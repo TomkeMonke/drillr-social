@@ -1,0 +1,77 @@
+{
+  "_comment": [
+    "Tuning for the TikTok carousel pipeline. Everything the template needs that",
+    "is NOT per-post lives here, so a look change is a config edit, never a code",
+    "edit. See README.md.",
+    "",
+    "font: file in fonts/. Run `node slideshow.mjs fonts` to fetch",
+    "the candidates and `python render.py --font-sample` to compare them.",
+    "",
+    "backgrounds.*: subfolders of backgrounds/ (gitignored - you",
+    "fill them). `player` carries the hook and the numbered items, `stadium`",
+    "carries the CTA. Split so a stadium wide-shot never lands on slide 1, where",
+    "a face is doing the stopping work."
+  ],
+
+  "font": "Fredoka.ttf",
+  "width": 1080,
+  "height": 1920,
+
+  "itemCount": 5,
+
+  "backgrounds": {
+    "player": "players",
+    "stadium": "stadiums",
+    "cooldownDays": 45
+  },
+
+  "cta": {
+    "_comment": [
+      "afterItem: the app mention goes AFTER this many numbered items, not at",
+      "the end. With itemCount 5 and afterItem 4 the carousel reads",
+      "hook, 1, 2, 3, 4, app, 5 - so the plug lands while people are still",
+      "swiping and the last slide is content, not an ad. Set it to itemCount to",
+      "put the CTA last instead."
+    ],
+    "afterItem": 4,
+    "text": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+    "overlay": {
+      "path": "assets/app-screenshot.png",
+      "widthPct": 0.44,
+      "xPct": 0.62,
+      "yPct": 0.71,
+      "radiusPct": 0.035
+    }
+  },
+
+  "caption": {
+    "lead": "Lock in",
+    "hashtags": [
+      "football",
+      "footballapp",
+      "footballskills",
+      "soccer",
+      "footballtiktok"
+    ]
+  },
+
+  "copy": {
+    "model": "claude-opus-5",
+    "effort": "high"
+  },
+
+  "tiktok": {
+    "_comment": [
+      "OFF until the app clears TikTok's audit - see README 'Turning on auto-post'.",
+      "urlPrefix must be a domain verified in the TikTok developer portal;",
+      "PULL_FROM_URL rejects anything else, including Firebase Storage URLs.",
+      "privacyLevel stays SELF_ONLY while unaudited: TikTok forces private on",
+      "unaudited clients anyway, and asking for PUBLIC_TO_EVERYONE just fails."
+    ],
+    "enabled": false,
+    "urlPrefix": "https://drillr.app/social/",
+    "privacyLevel": "SELF_ONLY",
+    "disableComment": false,
+    "autoAddMusic": true
+  }
+}

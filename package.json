@@ -1,0 +1,22 @@
+{
+  "name": "drillr-social",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Generates and schedules the @drillr_app TikTok photo carousels",
+  "scripts": {
+    "doctor": "node slideshow.mjs doctor",
+    "fonts": "node slideshow.mjs fonts",
+    "plan": "node slideshow.mjs plan",
+    "list": "node slideshow.mjs list",
+    "approve": "node slideshow.mjs approve",
+    "render": "node slideshow.mjs render",
+    "publish": "node slideshow.mjs publish"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.70.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

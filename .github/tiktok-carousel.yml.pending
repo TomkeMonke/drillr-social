@@ -1,0 +1,72 @@
+name: TikTok carousel
+
+# Posts the oldest RENDERED carousel from state/queue.json.
+#
+# Until config.json has tiktok.enabled = true this is a DRY RUN:
+# it prints what it would post and exits 0. That is on purpose - it proves the
+# cron, the queue and the checkout all work while the TikTok app is still going
+# through audit, so turning auto-post on is a one-line config change rather
+# than a first run in the dark.
+#
+# Rendering does NOT happen here. Backgrounds are wallpapers on tomek's machine
+# (gitignored, and they are not going in an app repo), so `render` runs locally
+# and the slides are uploaded to drillr.app; this job only publishes.
+#
+# Note: the schedule only fires from the default branch (master).
+
+on:
+  schedule:
+    # 17:00 UTC. Evening in EU/UK, after school in the US - which is when the
+    # account's audience is actually on TikTok.
+    - cron: '0 17 * * *'
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # to push the queue state change back
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Publish the oldest rendered carousel
+        env:
+          TIKTOK_CLIENT_KEY: ${{ secrets.TIKTOK_CLIENT_KEY }}
+          TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
+          TIKTOK_REFRESH_TOKEN: ${{ secrets.TIKTOK_REFRESH_TOKEN }}
+        run: node slideshow.mjs publish --commit
+
+      # TikTok invalidates the old refresh token on every refresh, so the secret
+      # MUST be rewritten or tomorrow's run fails auth. Needs a PAT with secrets
+      # write - GITHUB_TOKEN cannot update secrets. Without the PAT the step is
+      # skipped and the next run breaks, so the guard also warns.
+      - name: Rotate the stored refresh token
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.TIKTOK_TOKEN_PAT }}
+        run: |
+          if [ ! -f state/.refresh-token ]; then
+            echo "no rotated token this run (dry run, or nothing to post)"; exit 0
+          fi
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::TIKTOK_TOKEN_PAT is not set - the rotated refresh token cannot be stored and the next run WILL fail auth."
+            exit 1
+          fi
+          gh secret set TIKTOK_REFRESH_TOKEN --body "$(cat state/.refresh-token)"
+          echo "TIKTOK_REFRESH_TOKEN updated"
+
+      - name: Commit the queue state
+        if: always()
+        run: |
+          if git diff --quiet -- state/; then
+            echo "queue unchanged"; exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add state/
+          git commit -m "chore(social): mark carousel posted"
+          git push

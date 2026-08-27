@@ -1,0 +1,19 @@
+# Wallpapers you drop in yourself - large binaries, and they are a curation
+# decision rather than source. The rendered slides are derived output.
+# state/ IS committed: queue.json and backgrounds-used.json are the pipeline's
+# memory, and losing them means repeating hooks and backgrounds.
+backgrounds/*/*
+!backgrounds/*/.gitkeep
+out/*
+!out/.gitkeep
+
+# Fetched by `node slideshow.mjs fonts`. Google Fonts are OFL - redistributable
+# with the licence attached, but there is no reason to carry 700 KB of binaries
+# when one command pulls them.
+fonts/*.ttf
+
+# Rotated TikTok refresh token. Never commit this.
+state/.refresh-token
+
+node_modules/
+package-lock.json

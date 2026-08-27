@@ -149,16 +149,3 @@ leaving a dead token in place.
     state/            queue.json + backgrounds-used.json (committed - this is the memory)
     out/              rendered slides (gitignored)
 
-## Enabling the scheduled workflow
-
-`.github/tiktok-carousel.yml.pending` is the daily job. It is not in
-`.github/workflows/` because the `gh` token used to create this repo lacked the
-`workflow` scope, and GitHub refuses such a push. To activate it:
-
-    gh auth refresh -h github.com -s workflow
-    mkdir -p .github/workflows
-    git mv .github/tiktok-carousel.yml.pending .github/workflows/tiktok-carousel.yml
-    git commit -m "Add scheduled publish workflow" && git push
-
-Or paste the file into `.github/workflows/tiktok-carousel.yml` via the GitHub
-web UI, which needs no extra scope.

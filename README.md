@@ -38,13 +38,13 @@ TikTok even if the cron fires at the wrong moment.
 npm i --no-save @anthropic-ai/sdk     # only `plan` needs it
 pip install Pillow                    # only `render` needs it
 
-node slideshow.mjs fonts        # fetch the candidate fonts
+node slideshow.mjs fonts        # fetch the fonts
 python render.py --font-sample  # compare them -> out/font-sample.png
 ```
 
-Set `font` in `config.json` to whichever matches best. The reference posts use
-TikTok's own built-in font, which is not redistributable, so this picks the
-closest Google Font. `Fredoka.ttf` is the current default.
+The font is **Archivo Black** - what the reference carousels were set in, and
+what `config.json` ships pointing at. The other four are only there so
+`--font-sample` has something to hold it against if the look is ever revisited.
 
 Then fill the background pool - see `backgrounds/README.md`. Nothing downloads
 images; you choose them, the pipeline rotates them and remembers what it used.
@@ -58,6 +58,60 @@ Check the lot:
 ```bash
 node slideshow.mjs doctor
 ```
+
+## Matching the reference look
+
+The type is not eyeballed. `render.py --calibrate <folder-of-slides>` measures
+outline thickness and line spacing off finished JPEGs and prints them beside
+what the renderer is currently doing:
+
+```bash
+python render.py --calibrate ~/Downloads/reference-slides
+python render.py --calibrate out/<id>          # and the same for fresh output
+```
+
+Both numbers are normalised against **stem width**, not line height. Line
+height was the obvious choice and it is wrong: a line of text measures shorter
+when its words happen to have no descender, so the identical template reads
+differently depending on whether the copy says "recovery" or "recover". Stem
+width is on every line of every slide.
+
+Against the 32 reference slides the ratios are `outline/stem 0.429` and
+`advance/stem 7.714`; Archivo Black's stem is `0.1950em`, which is what turns
+those into `STROKE_RATIO` and `LINE_SPACING` at the top of `render.py`. Current
+output measures within 1.5% of both.
+
+One thing does not match and cannot: Archivo Black's stems are about 7% heavier
+than the reference face relative to line height. That is the font, not the
+settings - which is also why `EMBOLDEN_RATIO` is 0 rather than adding faux-bold
+on top.
+
+### The promo slide
+
+The app mention carries two overlays, both positioned off the reference promo
+slide rather than by eye:
+
+    assets/app-home.jpg        the phone shot, large, low right
+    assets/store-listing.jpg   the store card, small, mid left
+
+`cta.overlays` in `config.json` holds them. `xPct`/`yPct` are the CENTRE of each
+overlay as a fraction of the frame, later entries paste over earlier ones, and
+all of it sits UNDER the text. An overlay may hang off the frame - `render.py`
+trims to the visible rectangle instead of refusing, which is how the phone can
+bleed past an edge if you move it.
+
+Both assets are stored exactly as supplied, black margins and all. That is what
+`radiusPct: 0.115` on the phone is for: it rounds the OUTER rectangle by the
+device's own corner radius plus its margin, so the rounding stays concentric
+with the screen instead of cutting a second curve inside the first. Re-crop
+either file and those numbers stop meaning anything - move the position instead.
+
+### The hook slide renders 5% small
+
+`textScale: 0.95` on the hook, set in `slideshow.mjs`. The hook is the cover, so
+TikTok re-crops it for the feed and the profile grid, and type sized to the full
+frame loses its first and last words. The scale is applied after wrapping, so
+the line breaks someone approved do not move - the text just gets smaller.
 
 ## The loop
 
@@ -197,6 +251,7 @@ leaving a dead token in place.
 
     TUTORIAL.html     the walkthrough to hand to someone new - open in a browser
     slideshow.mjs     the CLI - every verb
+    assets/           the two promo-slide overlays
     render.py         Pillow renderer; the whole look lives here
     config.json       template tuning, CTA text, hashtags, TikTok settings
     lib/copy.mjs      Claude drafting + the brand prompt

@@ -13,7 +13,7 @@
     "a face is doing the stopping work."
   ],
 
-  "font": "Fredoka.ttf",
+  "font": "ArchivoBlack.ttf",
   "width": 1080,
   "height": 1920,
 
@@ -35,13 +35,35 @@
     ],
     "afterItem": 4,
     "text": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
-    "overlay": {
-      "path": "assets/app-screenshot.png",
-      "widthPct": 0.44,
-      "xPct": 0.62,
-      "yPct": 0.71,
-      "radiusPct": 0.035
-    }
+
+    "_overlays": [
+      "Two of them, positioned off the reference promo slide rather than by eye:",
+      "the phone shot large on the right, the store listing small and low on the",
+      "left. xPct/yPct are the CENTRE of each, as fractions of the frame.",
+      "Order matters - later entries paste on top."
+    ],
+    "overlays": [
+      {
+        "path": "assets/store-listing.jpg",
+        "widthPct": 0.405,
+        "xPct": 0.223,
+        "yPct": 0.469,
+        "radiusPct": 0
+      },
+      {
+        "_note": [
+          "app-home.jpg keeps its own black margin around the device, so these",
+          "numbers place the OUTER rectangle where the reference has it and the",
+          "phone lands inside. radiusPct is the device's own corner radius plus",
+          "that margin, which keeps the rounding concentric with the screen."
+        ],
+        "path": "assets/app-home.jpg",
+        "widthPct": 0.498,
+        "xPct": 0.705,
+        "yPct": 0.621,
+        "radiusPct": 0.115
+      }
+    ]
   },
 
   "caption": {

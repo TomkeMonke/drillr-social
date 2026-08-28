@@ -3,6 +3,7 @@ Slide renderer for the TikTok photo-carousel pipeline.
 
     python render.py <spec.json>
     python render.py --font-sample     # candidate-font contact sheet
+    python render.py --calibrate <dir> # re-derive the ratios from reference slides
 
 Reads a post spec (built by slideshow.mjs, never hand-written) and writes one
 PNG per slide into the spec's outDir. Pure composition: it draws the text you
@@ -31,6 +32,21 @@ The outline width scales WITH the font size (STROKE_RATIO), not as a constant.
 A constant stroke reads as a hairline on the hook slide and as a blob on the
 CTA slide.
 
+EMBOLDEN_RATIO, AND WHY IT IS ZERO
+----------------------------------
+The reference slides were described as Archivo Black with bold applied on top,
+so this draws each line twice to be able to reproduce that: once in black at
+stroke_width EMBOLDEN + OUTLINE for the silhouette, then once in white at
+stroke_width EMBOLDEN for the letterform. A stroke in the same colour as the
+fill is a faux-bold, which Pillow has no other way to do.
+
+Measuring the references settled it the other way. Their stems come out about
+7% LIGHTER than plain Archivo Black relative to line height, so any
+emboldening at all overshoots. EMBOLDEN_RATIO is 0 and the second pass
+collapses to an ordinary draw. The machinery stays because the finding is
+about these particular slides, not about the template: set the ratio to
+something like 0.006 and the weight comes back, evenly, at every font size.
+
 Requires Pillow (`pip install Pillow`).
 """
 
@@ -44,12 +60,20 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 FONTS = os.path.join(DIR, "fonts")
 
 # ---- template constants ----
-# Derived by measuring the reference carousel (7656186846942203169). Ratios, not
-# pixels, so a future 1440x2560 render keeps the same proportions.
+# Measured off 32 reference slides with `--calibrate`, not guessed. Everything
+# there is normalised against stem width, so it transfers cleanly even though
+# the references are 1179x1949 and these render at 1080x1920:
+#
+#     outline / stem     0.429      line advance / stem     7.714
+#
+# Archivo Black's stem is 0.1950em, which is what converts those into the
+# per-em ratios below. Re-run `python render.py --calibrate <folder>` against
+# both the references and a folder of fresh output to check the drift.
 CANVAS = (1080, 1920)
-TEXT_WIDTH_PCT = 0.88     # text box width as a fraction of canvas width
-LINE_SPACING = 1.18       # line advance as a multiple of font size
-STROKE_RATIO = 0.070      # outline width as a multiple of font size
+TEXT_WIDTH_PCT = 0.90     # text box width as a fraction of canvas width
+LINE_SPACING = 1.478      # line advance as a multiple of font size
+STROKE_RATIO = 0.081      # BLACK outline width as a multiple of font size
+EMBOLDEN_RATIO = 0.0      # faux-bold before the outline; see the docstring
 MAX_LINES = 4             # past 4 lines the slide stops being skimmable
 MIN_FONT = 28
 MAX_FONT = 200
@@ -58,15 +82,15 @@ MAX_FONT = 200
 # above the true middle because the eye reads a centred block as low when the
 # subject's face is in the upper third - which it is in every football wallpaper.
 LAYOUT_CENTRE = {
-    "center": 0.47,
-    "top": 0.22,
+    "center": 0.49,
+    "top": 0.183,
     "bottom": 0.74,
 }
 # Height budget for the text block, per layout. `top` gets less because the CTA
 # slide has to leave the bottom two thirds for the app screenshot.
 LAYOUT_HEIGHT_PCT = {
     "center": 0.46,
-    "top": 0.34,
+    "top": 0.30,
     "bottom": 0.34,
 }
 
@@ -104,6 +128,38 @@ def wrap(text, font, max_width, draw):
     return lines
 
 
+def ink_padding(size):
+    """How far the drawn glyph spills past its layout box, each side.
+
+    Emboldening and the outline both grow outward from the letterform, so a
+    line wrapped to exactly box_w renders wider than box_w. Fitting without
+    this is how type ends up touching the frame edge on the longest line.
+    """
+    return round(size * (EMBOLDEN_RATIO + STROKE_RATIO))
+
+
+def draw_stroked_line(draw, xy, text, font, fill, stroke_fill, size):
+    """One line of the house treatment: white fill inside a black outline.
+
+    Two passes so EMBOLDEN_RATIO can fatten the letterform independently of the
+    outline - see EMBOLDEN_RATIO, AND WHY IT IS ZERO in the module docstring.
+    """
+    embolden = round(size * EMBOLDEN_RATIO)
+    outline = max(1, round(size * STROKE_RATIO))
+    if outline + embolden > 0:
+        draw.text(
+            xy, text, font=font, fill=stroke_fill, anchor="mm",
+            stroke_width=outline + embolden, stroke_fill=stroke_fill,
+        )
+    if embolden > 0:
+        draw.text(
+            xy, text, font=font, fill=fill, anchor="mm",
+            stroke_width=embolden, stroke_fill=fill,
+        )
+    else:
+        draw.text(xy, text, font=font, fill=fill, anchor="mm")
+
+
 def fit_text(draw, text, font_name, box_w, box_h, max_lines=MAX_LINES):
     """Largest font size whose wrapped text fits the box and the line budget."""
     best = None
@@ -111,7 +167,7 @@ def fit_text(draw, text, font_name, box_w, box_h, max_lines=MAX_LINES):
     while lo <= hi:
         mid = (lo + hi) // 2
         font = load_font(font_name, mid)
-        lines = wrap(text, font, box_w, draw)
+        lines = wrap(text, font, box_w - 2 * ink_padding(mid), draw)
         block_h = len(lines) * mid * LINE_SPACING if lines else box_h + 1
         if lines is not None and len(lines) <= max_lines and block_h <= box_h:
             best = (mid, lines, font)
@@ -122,7 +178,8 @@ def fit_text(draw, text, font_name, box_w, box_h, max_lines=MAX_LINES):
         # Copy too long for the budget. Render at the floor rather than crash:
         # a cramped slide is reviewable, a stack trace at 3am is not.
         font = load_font(font_name, MIN_FONT)
-        return MIN_FONT, wrap(text, font, box_w, draw) or [text], font
+        usable = box_w - 2 * ink_padding(MIN_FONT)
+        return MIN_FONT, wrap(text, font, usable, draw) or [text], font
     return best
 
 
@@ -153,9 +210,26 @@ def rounded(img, radius_pct):
     return img
 
 
+def paste_clipped(canvas, layer, x, y):
+    """alpha_composite that tolerates an overlay hanging off the frame.
+
+    Pillow's alpha_composite refuses a layer that does not fit entirely inside
+    the destination, and the promo slide deliberately runs the phone shot past
+    the edge. Trim to the visible rectangle first and the bleed is free.
+    """
+    left, top = max(0, -x), max(0, -y)
+    right = min(layer.width, canvas.width - x)
+    bottom = min(layer.height, canvas.height - y)
+    if right <= left or bottom <= top:
+        return  # entirely off-frame
+    if (left, top, right, bottom) != (0, 0, layer.width, layer.height):
+        layer = layer.crop((left, top, right, bottom))
+    canvas.alpha_composite(layer, (x + left, y + top))
+
+
 def draw_slide(slide, spec):
     width, height = spec.get("width", CANVAS[0]), spec.get("height", CANVAS[1])
-    font_name = spec.get("font", "Nunito.ttf")
+    font_name = spec.get("font", "ArchivoBlack.ttf")
 
     bg_path = slide.get("background")
     if bg_path and os.path.exists(bg_path):
@@ -188,7 +262,7 @@ def draw_slide(slide, spec):
         layer = rounded(layer, float(over.get("radiusPct", 0)))
         x = round(width * float(over.get("xPct", 0.5)) - layer.width / 2)
         y = round(height * float(over.get("yPct", 0.5)) - layer.height / 2)
-        canvas.alpha_composite(layer, (x, y))
+        paste_clipped(canvas, layer, x, y)
 
     draw = ImageDraw.Draw(canvas)
     text = (slide.get("text") or "").strip()
@@ -199,21 +273,29 @@ def draw_slide(slide, spec):
         max_lines = int(slide.get("maxLines", MAX_LINES))
         size, lines, font = fit_text(draw, text, font_name, box_w, box_h, max_lines)
 
-        stroke = max(1, round(size * STROKE_RATIO))
+        # textScale trims the fitted size without re-wrapping, so the line
+        # breaks a human approved do not move. Used on the hook slide, which is
+        # the carousel's cover and gets re-cropped by TikTok in the feed and on
+        # the profile grid.
+        scale = float(slide.get("textScale", 1.0))
+        if scale != 1.0:
+            size = max(MIN_FONT, round(size * scale))
+            font = load_font(font_name, size)
+
         advance = size * LINE_SPACING
         block_h = len(lines) * advance
-        centre_y = height * LAYOUT_CENTRE.get(layout, 0.47)
+        centre_y = height * LAYOUT_CENTRE.get(layout, 0.49)
         y = centre_y - block_h / 2 + advance / 2
 
         for line in lines:
-            draw.text(
+            draw_stroked_line(
+                draw,
                 (width / 2, y),
                 line,
-                font=font,
-                fill=slide.get("color", "#FFFFFF"),
-                anchor="mm",
-                stroke_width=stroke,
-                stroke_fill=slide.get("strokeColor", "#000000"),
+                font,
+                slide.get("color", "#FFFFFF"),
+                slide.get("strokeColor", "#000000"),
+                size,
             )
             y += advance
 
@@ -263,17 +345,9 @@ def font_sample():
         advance = size * LINE_SPACING
         y = top + cell / 2 - (len(lines) * advance) / 2 + advance / 2 + 14
         for text_line in lines:
-            draw.text(
-                (540, y),
-                text_line,
-                font=font,
-                fill="#FFFFFF",
-                anchor="mm",
-                stroke_width=max(1, round(size * STROKE_RATIO)),
-                stroke_fill="#000000",
-            )
+            draw_stroked_line(draw, (540, y), text_line, font, "#FFFFFF", "#000000", size)
             y += advance
-        label = load_font("Nunito.ttf", 26)
+        label = load_font("ArchivoBlack.ttf", 22)
         draw.text((24, top + 18), name, font=label, fill="#8FA3B8")
 
     out = os.path.join(DIR, "out", "font-sample.png")
@@ -282,11 +356,183 @@ def font_sample():
     print("wrote %s" % out)
 
 
+def _text_bands(image):
+    """Rows of near-white ink, grouped into lines. Shared by every measurement.
+
+    Near-white and near-black rather than exact: these come back as JPEGs, so
+    the type is ringed with compression noise and nothing is #FFFFFF any more.
+    """
+    import numpy as np
+
+    array = np.asarray(image.convert("RGB")).astype(np.int16)
+    white = array.min(axis=2) > 235
+    black = array.max(axis=2) < 45
+    width = image.width
+
+    rows = np.where(white.sum(axis=1) > width * 0.02)[0]
+    if len(rows) == 0:
+        return white, black, []
+
+    bands, start, prev = [], rows[0], rows[0]
+    for row in rows[1:]:
+        if row - prev > 3:
+            bands.append((start, prev))
+            start = row
+        prev = row
+    bands.append((start, prev))
+    return white, black, bands
+
+
+def stem_width_em(font_name="ArchivoBlack.ttf"):
+    """Vertical stem thickness of this font, as a fraction of its em size.
+
+    The bridge between what can be measured off a finished JPEG (pixels of
+    white) and what this file is written in (fractions of a font size).
+    """
+    import statistics
+
+    size = 200
+    font = load_font(font_name, size)
+    probe = Image.new("RGB", (size * 12, size * 3), (0, 0, 0))
+    draw = ImageDraw.Draw(probe)
+    draw.text((probe.width / 2, probe.height / 2), "minimum",
+              font=font, fill="#FFFFFF", anchor="mm")
+    return statistics.median(_stem_runs(probe)) / size
+
+
+def _stem_runs(image):
+    """White run lengths across the x-height zone - one sample per stem crossed."""
+    import numpy as np
+
+    array = np.asarray(image.convert("RGB")).astype(np.int16)
+    white = array.min(axis=2) > 235
+    rows = np.where(white.any(axis=1))[0]
+    if len(rows) == 0:
+        return [1]
+    top, bottom = rows[0], rows[-1]
+    height = bottom - top + 1
+    runs = []
+    for y in range(top + int(height * 0.35), top + int(height * 0.72)):
+        row = white[y]
+        x = 0
+        while x < image.width:
+            if row[x]:
+                start = x
+                while x < image.width and row[x]:
+                    x += 1
+                if 2 <= x - start <= height:
+                    runs.append(x - start)
+            else:
+                x += 1
+    return runs or [1]
+
+
+def calibrate(sample_dir):
+    """Re-derive the template ratios from a folder of reference slides.
+
+    Everything is normalised against STEM WIDTH - the thickness of a vertical
+    stroke - and not against the height of a line. Line height was the obvious
+    choice and it is wrong: a line reads shorter when its words happen to carry
+    no descender, so the same template measures differently depending on whether
+    the copy says "your recovery" or "recover". Stem width is there on every
+    line of every slide and does not move.
+
+    Prints what the samples say next to what this file currently does. It writes
+    nothing - read the numbers and edit the constants at the top.
+    """
+    import statistics
+
+    import numpy as np
+
+    files = [
+        os.path.join(sample_dir, f)
+        for f in sorted(os.listdir(sample_dir))
+        if f.lower().endswith((".jpg", ".jpeg", ".png"))
+    ]
+    if not files:
+        raise SystemExit("no images in %s" % sample_dir)
+
+    outline_ratios, advance_ratios = [], []
+    for path in files:
+        image = Image.open(path)
+        width = image.width
+        white, black, bands = _text_bands(image)
+        # Under 55px is a watermark or JPEG noise; over 130 is two lines that
+        # touched and merged. Neither can be measured.
+        lines = [b for b in bands if 55 < b[1] - b[0] < 130]
+        if not lines:
+            continue
+
+        stems, outlines = [], []
+        for y0, y1 in lines:
+            height = y1 - y0 + 1
+            for y in range(y0 + int(height * 0.35), y0 + int(height * 0.72)):
+                xs = np.where(white[y])[0]
+                if len(xs) == 0:
+                    continue
+                # Outline: walk outward from the outermost white pixel through
+                # the black ringing it. Only the outer edges - black BETWEEN two
+                # letters is two outlines meeting and measures double.
+                for x_start, step in ((xs[0] - 1, -1), (xs[-1] + 1, 1)):
+                    x, run = x_start, 0
+                    while 0 <= x < width and black[y][x]:
+                        run += 1
+                        x += step
+                    if 2 <= run <= 40:
+                        outlines.append(run)
+                x = 0
+                while x < width:
+                    if white[y][x]:
+                        start = x
+                        while x < width and white[y][x]:
+                            x += 1
+                        if 4 <= x - start <= 60:
+                            stems.append(x - start)
+                    else:
+                        x += 1
+        if len(stems) < 8:
+            continue
+        stem = statistics.median(stems)
+        if outlines:
+            outline_ratios.append(statistics.median(outlines) / stem)
+
+        tops = [b[0] for b in lines]
+        for i in range(len(tops) - 1):
+            gap = tops[i + 1] - tops[i]
+            if stem * 3 < gap < stem * 14:
+                advance_ratios.append(gap / stem)
+
+    stem_em = stem_width_em()
+    here_outline = STROKE_RATIO / stem_em
+    here_advance = LINE_SPACING / stem_em
+
+    print("measured %d slides in %s" % (len(files), sample_dir))
+    print("(Archivo Black stem = %.4f em)" % stem_em)
+    print("")
+    print("  %-24s %-22s %s" % ("", "these slides", "what this file does"))
+    for label, values, current in (
+        ("outline / stem", outline_ratios, here_outline),
+        ("line advance / stem", advance_ratios, here_advance),
+    ):
+        if not values:
+            print("  %-24s no usable samples" % label)
+            continue
+        measured = statistics.median(values)
+        print("  %-24s %-6.3f (n=%-4d)      %.3f   [x%.2f]"
+              % (label, measured, len(values), current, measured / current))
+    print("")
+    print("To adopt a column, multiply it by %.4f and write it into" % stem_em)
+    print("STROKE_RATIO / LINE_SPACING at the top of this file.")
+
 if __name__ == "__main__":
     args = sys.argv[1:]
     if not args:
         raise SystemExit(__doc__)
     if args[0] == "--font-sample":
         font_sample()
+    elif args[0] == "--calibrate":
+        if len(args) < 2:
+            raise SystemExit("usage: python render.py --calibrate <folder-of-slides>")
+        calibrate(args[1])
     else:
         render_spec(args[0])

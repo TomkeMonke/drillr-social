@@ -67,7 +67,11 @@ for (let i = 1; i < args.length; i += 1) {
 
 // ---------------------------------------------------------------- fonts
 
+// ArchivoBlack is THE font, not a candidate - it is what the reference
+// carousels were set in. The rest stay only so `--font-sample` has something to
+// compare against if the look is ever revisited.
 const FONT_SOURCES = {
+  'ArchivoBlack.ttf': 'Archivo+Black',
   'Nunito.ttf': 'Nunito:wght@900',
   'Baloo2.ttf': 'Baloo+2:wght@800',
   'Fredoka.ttf': 'Fredoka:wght@700',
@@ -327,15 +331,31 @@ function render() {
   const stadiums = pool.choose(CONFIG.backgrounds.stadium, 1, CONFIG.backgrounds.cooldownDays);
   for (const warning of [...players.warnings, ...stadiums.warnings]) console.log(`  ! ${warning}`);
 
-  const overlayPath = path.resolve(REPO, CONFIG.cta.overlay.path);
-  if (!fs.existsSync(overlayPath)) {
-    console.log(`  ! CTA overlay missing: ${CONFIG.cta.overlay.path} - the CTA slide will render without the app shot`);
+  // Resolved here rather than in render.py so a missing file is one warning at
+  // the top of the run, not a surprise on the sixth image.
+  const ctaOverlays = (CONFIG.cta.overlays ?? []).map((o) => ({
+    ...o,
+    path: path.resolve(REPO, o.path),
+  }));
+  for (const overlay of ctaOverlays) {
+    if (!fs.existsSync(overlay.path)) {
+      console.log(`  ! CTA overlay missing: ${path.relative(REPO, overlay.path)} - the CTA slide will render without it`);
+    }
   }
 
   // No tighter line cap on the hook than on the items. Capping it at 3 lines
   // makes the autofit shrink it BELOW the item slides, which inverts the
   // hierarchy - the one slide that has to stop a thumb ends up the smallest.
-  const hookSlide = { text: post.hook, background: players.files[0], layout: 'center' };
+  // textScale: the hook is the slide TikTok is most likely to crop into - it is
+  // the cover, so it gets shown at other aspect ratios in the feed and on a
+  // profile grid. 5% of headroom costs nothing and stops the first and last
+  // words losing their edges.
+  const hookSlide = {
+    text: post.hook,
+    background: players.files[0],
+    layout: 'center',
+    textScale: 0.95,
+  };
 
   const itemSlides = post.items.map((item, i) => ({
     text: `${i + 1}. ${item}`,
@@ -348,7 +368,7 @@ function render() {
     background: stadiums.files[0],
     layout: 'top',
     maxLines: 5,
-    overlays: [{ ...CONFIG.cta.overlay, path: overlayPath }],
+    overlays: ctaOverlays,
   };
 
   // The app mention is NOT last. It goes after `cta.afterItem` items, so the
@@ -507,7 +527,9 @@ function doctor() {
     if (!fs.existsSync(dir)) ok(`backgrounds/${CONFIG.backgrounds[key]} exists`, false, `mkdir ${path.relative(REPO, dir)}`);
   }
 
-  ok(`CTA overlay ${CONFIG.cta.overlay.path}`, fs.existsSync(path.resolve(REPO, CONFIG.cta.overlay.path)));
+  for (const overlay of CONFIG.cta.overlays ?? []) {
+    ok(`CTA overlay ${overlay.path}`, fs.existsSync(path.resolve(REPO, overlay.path)));
+  }
 
   console.log(`\n  auto-post: ${CONFIG.tiktok.enabled ? 'ENABLED' : 'off (config.tiktok.enabled=false)'}`);
   const queue = queueLib.load();

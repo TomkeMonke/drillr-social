@@ -8,6 +8,8 @@
     "doctor": "node slideshow.mjs doctor",
     "fonts": "node slideshow.mjs fonts",
     "plan": "node slideshow.mjs plan",
+    "brief": "node slideshow.mjs brief",
+    "import": "node slideshow.mjs import",
     "list": "node slideshow.mjs list",
     "approve": "node slideshow.mjs approve",
     "render": "node slideshow.mjs render",

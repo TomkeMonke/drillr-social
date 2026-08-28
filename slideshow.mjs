@@ -2,7 +2,9 @@
 //
 //   node slideshow.mjs doctor              # is everything wired up
 //   node slideshow.mjs fonts               # fetch candidate fonts (one-off)
-//   node slideshow.mjs plan --count 3      # Claude drafts 3 carousels
+//   node slideshow.mjs plan --count 3      # Claude drafts 3 carousels (API key)
+//   node slideshow.mjs brief --count 3     # print that same ask, to paste anywhere (free)
+//   node slideshow.mjs import --from x.json  # queue drafts written by hand (free)
 //   node slideshow.mjs list                # what is in the queue
 //   node slideshow.mjs edit <id>           # print one draft for editing
 //   node slideshow.mjs approve <id|all>    # the review gate
@@ -15,8 +17,14 @@
 // can be posted, until a human has read the copy. That is the whole reason
 // `plan` does not just render.
 //
+// `plan` is the only verb that calls the API and the only one that costs
+// anything. `brief` + `import` are the same step done by hand: `brief` prints
+// the exact ask, you paste it into whatever Claude you already pay for, and
+// `import` queues the result through the same clean-up and the same gate. The
+// pipeline cannot tell the two paths apart downstream.
+//
 // Install (one-off, not saved to package.json, matching the other scripts here):
-//   npm i --no-save @anthropic-ai/sdk
+//   npm i --no-save @anthropic-ai/sdk   # `plan` only - `import` needs nothing
 //   pip install Pillow
 //
 // See README.md for setup and for turning auto-post on.
@@ -28,6 +36,9 @@ import { fileURLToPath } from 'node:url';
 
 import * as queueLib from './lib/queue.mjs';
 import * as pool from './lib/backgrounds.mjs';
+// Safe to import at the top level: houserules.mjs has no dependencies, unlike
+// copy.mjs, which is loaded lazily inside `plan` so the SDK stays optional.
+import { systemFor, normalise, lint } from './lib/houserules.mjs';
 
 const DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPO = DIR; // standalone repo: the tool root IS the repo root
@@ -44,7 +55,7 @@ const has = (name) => args.includes(`--${name}`);
 
 // Flags that consume the next argument, so `--topic recovery` does not leave
 // "recovery" looking like a post id.
-const VALUED = new Set(['count', 'topic']);
+const VALUED = new Set(['count', 'topic', 'from']);
 const positional = [];
 for (let i = 1; i < args.length; i += 1) {
   if (args[i].startsWith('--')) {
@@ -176,6 +187,119 @@ function approve() {
   }
   queueLib.save(queue);
   console.log('\n  node slideshow.mjs render');
+}
+
+// ---------------------------------------------------------------- brief / import
+
+/**
+ * The free path, half one: print exactly what `plan` would have asked Claude,
+ * for pasting into a Claude session you are already paying for.
+ *
+ * This is a straight lift of the `plan` request - same system prompt, same
+ * do-not-repeat list, same shape - because the moment the two drift, copy
+ * written by hand stops matching copy written by the API and the feed reads
+ * like two different accounts.
+ */
+function brief() {
+  const count = Number(flag('count', '3'));
+  const topic = flag('topic');
+  const queue = queueLib.load();
+  const recentHooks = queue.posts.slice(-40).map((p) => p.hook);
+
+  console.log(systemFor(CONFIG.itemCount));
+  console.log(`\n---\n`);
+  console.log(
+    `Draft ${count} distinct carousel${count === 1 ? '' : 's'}. ` +
+      (topic ? `Theme: ${topic}. ` : '') +
+      `Vary the shape: a mistakes list, a habits list, a signs list and a ` +
+      `reasons list all read differently in the feed.`
+  );
+
+  if (recentHooks.length) {
+    console.log(
+      `\nAlready posted or queued - do not repeat these angles, and do not write a near-synonym of one:`
+    );
+    for (const hook of recentHooks) console.log(`- ${hook}`);
+  }
+
+  console.log(
+    `\nReply with nothing but a JSON array of ${count} object(s), each exactly:\n` +
+      `  { "hook": "...", "items": [${Array.from({ length: CONFIG.itemCount }, () => '"..."').join(', ')}], "caption": "..." }\n` +
+      `caption is two to four casual words for the post text, before the hashtags.`
+  );
+
+  console.log(`\n---\n`);
+  console.log('Save the reply to drafts.json, then:');
+  console.log('  node slideshow.mjs import --from drafts.json');
+}
+
+/**
+ * The free path, half two: queue drafts that came from anywhere.
+ *
+ * Everything lands as `draft`, never `approved`. The point of the gate is that
+ * a human has read the copy in the queue, and pasting a model's reply into a
+ * file is not that - it is the same unreviewed output `plan` produces, just
+ * carried by hand. Skipping ahead here would quietly remove the one control
+ * the whole pipeline is built around.
+ */
+function importDrafts() {
+  const from = flag('from');
+  const raw = from
+    ? fs.readFileSync(path.resolve(REPO, from), 'utf8')
+    : fs.readFileSync(0, 'utf8');
+
+  if (!raw.trim()) throw new Error('nothing to import - pass --from <file> or pipe JSON in');
+
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    // A pasted reply often arrives wrapped in prose or a ```json fence. Pull
+    // the outermost array out rather than making someone hand-trim the file.
+    const match = raw.match(/\[[\s\S]*\]/);
+    if (!match) throw new Error('could not find JSON in that input');
+    parsed = JSON.parse(match[0]);
+  }
+
+  const incoming = Array.isArray(parsed) ? parsed : parsed.posts || [parsed];
+  const queue = queueLib.load();
+  const seen = new Set(queue.posts.map((p) => p.hook.toLowerCase()));
+  let queued = 0;
+
+  for (const entry of incoming) {
+    const draft = normalise(entry);
+    if (!draft.hook) {
+      console.log('  ! skipped an entry with no hook');
+      continue;
+    }
+    if (seen.has(draft.hook.toLowerCase())) {
+      console.log(`  ! skipped "${draft.hook}" - that hook is already in the queue`);
+      continue;
+    }
+
+    const post = {
+      id: queueLib.makeId(draft.hook, queue.posts),
+      status: 'draft',
+      createdAt: new Date().toISOString(),
+      hook: draft.hook,
+      items: draft.items,
+      cta: CONFIG.cta.text,
+      caption: draft.caption || CONFIG.caption.lead,
+    };
+    queue.posts.push(post);
+    seen.add(draft.hook.toLowerCase());
+    queued += 1;
+
+    console.log(`\n  ${post.id}`);
+    console.log(`    ${post.hook}`);
+    post.items.forEach((item, i) => console.log(`    ${i + 1}. ${item}`));
+    for (const warning of lint(post, CONFIG.itemCount)) console.log(`    ! ${warning}`);
+  }
+
+  if (!queued) return console.log('\nnothing queued');
+  queueLib.save(queue);
+  console.log(`\n${queued} draft(s) queued. Review them, then:`);
+  console.log('  node slideshow.mjs approve all');
 }
 
 // ---------------------------------------------------------------- render
@@ -349,7 +473,14 @@ function doctor() {
   });
   ok('Pillow', python.status === 0, 'pip install Pillow');
 
-  ok('ANTHROPIC_API_KEY (needed by `plan` only)', Boolean(process.env.ANTHROPIC_API_KEY), 'setx ANTHROPIC_API_KEY ...');
+  // Not counted as a failure: `plan` is the only verb that needs a key, and
+  // `brief` + `import` do the same job without one. Reporting this as MISS
+  // would say the pipeline is broken when it is merely on the free path.
+  console.log(
+    process.env.ANTHROPIC_API_KEY
+      ? '  ok   ANTHROPIC_API_KEY - `plan` will work'
+      : '  --   ANTHROPIC_API_KEY unset - use `brief` + `import` (free), or setx ANTHROPIC_API_KEY ...'
+  );
 
   for (const stat of pool.stats()) {
     ok(
@@ -375,7 +506,7 @@ function doctor() {
 
 // ---------------------------------------------------------------- main
 
-const VERBS = { fonts, plan, list, edit, approve, render, publish, doctor };
+const VERBS = { fonts, plan, brief, import: importDrafts, list, edit, approve, render, publish, doctor };
 
 if (!verb || !VERBS[verb]) {
   console.log(fs.readFileSync(fileURLToPath(import.meta.url), 'utf8').split('\n\n')[0]);

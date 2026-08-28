@@ -44,7 +44,8 @@ Then fill the background pool - see `backgrounds/README.md`. Nothing downloads
 images; you choose them, the pipeline rotates them and remembers what it used.
 Aim for 20+ in `players/` and 6+ in `stadiums/`.
 
-`ANTHROPIC_API_KEY` in the environment, for `plan` only.
+`ANTHROPIC_API_KEY` in the environment, for `plan` only - and `plan` is
+optional. See [Writing the copy without an API key](#writing-the-copy-without-an-api-key).
 
 Check the lot:
 
@@ -73,6 +74,38 @@ node slideshow.mjs publish <id> --manual
 ```
 
 `--topic` steers a batch: `plan --count 2 --topic recovery`.
+
+## Writing the copy without an API key
+
+`plan` is the only verb that calls the Anthropic API, and it is the only thing
+here that costs money. An API key bills from a **console.anthropic.com** balance,
+which is a separate pool from a Claude.ai subscription - a Pro or Max plan grants
+no API credit, and usage credits on claude.ai cannot be spent by a key.
+
+So there is a second path that costs nothing. `brief` prints the exact request
+`plan` would have sent - same system prompt, same do-not-repeat list, same output
+shape - and `import` queues whatever comes back:
+
+```bash
+node slideshow.mjs brief --count 3            # paste this into any Claude you already pay for
+node slideshow.mjs import --from drafts.json  # queue the reply
+node slideshow.mjs approve all                # same gate as always
+```
+
+`import` also reads stdin, so `... | node slideshow.mjs import` works. It does not
+mind a reply wrapped in prose or a ```` ```json ```` fence - it pulls the array out.
+Imported copy goes through the same `normalise` clean-up as `plan` (smart quotes,
+em dashes, terminal periods, stray `1.` numbering) plus a lint pass that flags
+hype vocabulary, invented statistics, emoji and Americanisms.
+
+Two deliberate limits:
+
+- Everything lands as `draft`, never `approved`. Pasting a model's reply into a
+  file is not a human reading the copy - it is the same unreviewed output `plan`
+  produces, carried by hand. The gate still has to be walked through.
+- The house rules live in `lib/houserules.mjs`, imported by both paths. That file
+  has no dependencies on purpose: the free path must not need the SDK installed.
+  Change the style there and both paths change together.
 
 ## Turning on auto-post
 

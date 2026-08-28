@@ -4,6 +4,12 @@ Generates the 7-slide photo carousels the
 [@drillr_app](https://www.tiktok.com/@drillr_app) account posts, and (once
 TikTok's audit clears) posts them on a schedule.
 
+Handing this to someone who has not seen it before? Point them at
+`TUTORIAL.html` - a self-contained page, opened straight from the folder in any
+browser, no server and no hosting anywhere. It walks the whole loop, and covers
+the two things that stop every Windows machine before the first command even
+runs.
+
 The template is copied from post `7656186846942203169`: 1080x1920, full-bleed
 wallpaper, heavy white type with a thick black outline auto-fitted to the frame.
 Slide order is
@@ -87,12 +93,30 @@ So there is a second path that costs nothing. `brief` prints the exact request
 shape - and `import` queues whatever comes back:
 
 ```bash
-node slideshow.mjs brief --count 3            # paste this into any Claude you already pay for
+node slideshow.mjs brief --count 3            # paste this into any assistant you use
+#                                             # -> save the JSON reply as drafts.json
 node slideshow.mjs import --from drafts.json  # queue the reply
 node slideshow.mjs approve all                # same gate as always
 ```
 
-`import` also reads stdin, so `... | node slideshow.mjs import` works. It does not
+Paste the brief into whichever assistant you already have open - Claude, ChatGPT,
+Gemini, whatever. It carries all of its own context, so nothing depends on which
+one, and a free tier is fine.
+
+**`drafts.json` is a file you create.** The repo does not ship one and `import`
+will not invent it - `--from drafts.json` on a folder without it just fails with
+`ENOENT`. Save the JSON array the assistant replies with to the **repo root**,
+next to `slideshow.mjs`:
+
+```
+drillr-social/drafts.json
+```
+
+The name is only a convention: `--from` takes any path, resolved against the repo
+root. The file is not gitignored, so it will show as untracked until you delete it.
+
+`import` also reads stdin, so `... | node slideshow.mjs import` works - that skips
+the file entirely. It does not
 mind a reply wrapped in prose or a ```` ```json ```` fence - it pulls the array out.
 Imported copy goes through the same `normalise` clean-up as `plan` (smart quotes,
 em dashes, terminal periods, stray `1.` numbering) plus a lint pass that flags
@@ -171,6 +195,7 @@ leaving a dead token in place.
 
 ## Files
 
+    TUTORIAL.html     the walkthrough to hand to someone new - open in a browser
     slideshow.mjs     the CLI - every verb
     render.py         Pillow renderer; the whole look lives here
     config.json       template tuning, CTA text, hashtags, TikTok settings

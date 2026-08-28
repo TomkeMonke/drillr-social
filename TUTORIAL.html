@@ -1,0 +1,888 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Setup and first-carousel walkthrough for the drillr-social TikTok carousel generator.">
+<style>
+  :root { color-scheme: light dark; }
+  img { max-width: 100%; }
+</style>
+<title>Drillr Carousel Setup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+
+<style>
+  :root {
+    --ground: #f6f7f9;
+    --surface: #ffffff;
+    --panel: #eef1f5;
+    --ink: #131820;
+    --muted: #5b6675;
+    --accent: #2a5fc4;
+    --accent-soft: #e6edfa;
+    --caution: #a85327;
+    --caution-soft: #f8eee7;
+    --line: #dde2e9;
+    --line-strong: #c4ccd8;
+
+    --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    --body: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0e1218;
+      --surface: #171c24;
+      --panel: #1e242e;
+      --ink: #e4e8ef;
+      --muted: #8a94a3;
+      --accent: #6aa3ff;
+      --accent-soft: #17243a;
+      --caution: #d98a52;
+      --caution-soft: #2a1f18;
+      --line: #262d38;
+      --line-strong: #39424f;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #0e1218;
+    --surface: #171c24;
+    --panel: #1e242e;
+    --ink: #e4e8ef;
+    --muted: #8a94a3;
+    --accent: #6aa3ff;
+    --accent-soft: #17243a;
+    --caution: #d98a52;
+    --caution-soft: #2a1f18;
+    --line: #262d38;
+    --line-strong: #39424f;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.65;
+    margin: 0;
+    padding: 0 24px 96px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 720px; margin: 0 auto; }
+
+  /* ---------------------------------------------------------- header */
+
+  header.masthead {
+    padding: 72px 0 36px;
+    border-bottom: 2px solid var(--ink);
+    margin-bottom: 44px;
+  }
+
+  .eyebrow {
+    font-family: var(--display);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 14px;
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-size: clamp(34px, 6vw, 50px);
+    font-weight: 700;
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+    margin: 0 0 18px;
+    text-wrap: balance;
+  }
+
+  .standfirst {
+    font-size: 19px;
+    color: var(--muted);
+    margin: 0;
+    max-width: 60ch;
+  }
+
+  /* ---------------------------------------------------------- sections */
+
+  section { margin: 0 0 52px; }
+
+  h2 {
+    font-family: var(--display);
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0 0 6px;
+    text-wrap: balance;
+  }
+
+  h2 + .sub {
+    color: var(--muted);
+    font-size: 16px;
+    margin: 0 0 24px;
+  }
+
+  h3 {
+    font-family: var(--display);
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0 0 8px;
+  }
+
+  p { margin: 0 0 16px; max-width: 65ch; }
+  p:last-child { margin-bottom: 0; }
+
+  a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.86em;
+    background: var(--panel);
+    padding: 2px 5px;
+    border-radius: 3px;
+  }
+
+  strong { font-weight: 600; }
+
+  /* ---------------------------------------------------------- steps */
+
+  ol.steps { list-style: none; margin: 0; padding: 0; counter-reset: step; }
+
+  ol.steps > li {
+    counter-increment: step;
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 0 18px;
+    padding: 0 0 30px;
+  }
+
+  ol.steps > li::before {
+    content: counter(step, decimal-leading-zero);
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    padding-top: 3px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  ol.steps > li > div { min-width: 0; }
+
+  /* ---------------------------------------------------------- command blocks */
+
+  .cmd {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    margin: 14px 0 16px;
+    overflow: hidden;
+  }
+
+  .cmd-label {
+    font-family: var(--display);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 14px 7px;
+    border-bottom: 1px solid var(--line);
+    background: var(--panel);
+  }
+
+  .cmd pre {
+    font-family: var(--mono);
+    font-size: 13.5px;
+    line-height: 1.75;
+    margin: 0;
+    padding: 14px;
+    overflow-x: auto;
+    tab-size: 2;
+  }
+
+  .cmd .c { color: var(--muted); }
+
+  /* ---------------------------------------------------------- callouts */
+
+  .note {
+    border: 1px solid var(--line-strong);
+    border-radius: 4px;
+    padding: 16px 18px;
+    margin: 20px 0;
+    background: var(--surface);
+  }
+
+  .note.caution { border-color: var(--caution); background: var(--caution-soft); }
+  .note.key { border-color: var(--accent); background: var(--accent-soft); }
+
+  .note-title {
+    font-family: var(--display);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin: 0 0 8px;
+  }
+  .note.caution .note-title { color: var(--caution); }
+  .note.key .note-title { color: var(--accent); }
+  .note p { margin-bottom: 10px; font-size: 16px; }
+  .note p:last-child { margin-bottom: 0; }
+
+  /* ---------------------------------------------------------- needs list */
+
+  dl.needs { margin: 0; display: grid; gap: 0; }
+
+  dl.needs > div {
+    display: grid;
+    grid-template-columns: 190px 1fr;
+    gap: 4px 20px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+    align-items: baseline;
+  }
+  dl.needs > div:first-child { border-top: 1px solid var(--line); }
+
+  dl.needs dt {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 15px;
+  }
+  dl.needs dd { margin: 0; color: var(--muted); font-size: 16px; }
+
+  /* ---------------------------------------------------------- flow */
+
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 8px;
+    margin: 8px 0 24px;
+    padding: 0;
+    list-style: none;
+  }
+
+  .flow li {
+    flex: 1 1 110px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 12px 13px;
+    background: var(--surface);
+  }
+
+  .flow .verb {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 3px;
+  }
+  .flow .who { font-size: 14px; color: var(--muted); line-height: 1.4; display: block; }
+  .flow li.human { background: var(--accent-soft); border-color: var(--accent); }
+  .flow li.human .who { color: var(--ink); }
+
+  /* ---------------------------------------------------------- details */
+
+  details {
+    border-top: 1px solid var(--line);
+    padding: 14px 0;
+  }
+  details summary {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+  }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::before {
+    content: "+";
+    font-family: var(--mono);
+    color: var(--accent);
+    font-weight: 700;
+  }
+  details[open] summary::before { content: "\2212"; }
+  details .inner { padding: 12px 0 2px 24px; }
+  details .inner p { font-size: 16px; }
+
+  footer {
+    border-top: 2px solid var(--ink);
+    margin-top: 56px;
+    padding-top: 20px;
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  @media (max-width: 560px) {
+    body { font-size: 16px; padding: 0 18px 64px; }
+    ol.steps > li { grid-template-columns: 30px 1fr; gap: 0 12px; }
+    dl.needs > div { grid-template-columns: 1fr; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">Drillr &middot; drillr-social</p>
+    <h1>Making TikTok carousels</h1>
+    <p class="standfirst">
+      A small command-line tool that turns five lines of copy into a seven-slide
+      photo carousel. It is all in the zip &mdash; everything below runs on your own
+      machine, and none of it costs anything.
+    </p>
+  </header>
+
+  <section>
+    <h2>What it actually does</h2>
+    <p class="sub">Four steps, and the second one is a person.</p>
+
+    <ul class="flow">
+      <li><span class="verb">plan</span><span class="who">copy gets drafted</span></li>
+      <li class="human"><span class="verb">approve</span><span class="who">you read it</span></li>
+      <li><span class="verb">render</span><span class="who">slides get drawn</span></li>
+      <li><span class="verb">publish</span><span class="who">upload</span></li>
+    </ul>
+
+    <p>
+      A post moves <code>draft &rarr; approved &rarr; rendered &rarr; posted</code> and
+      cannot skip a step. That is deliberate: <code>render</code> only looks at approved
+      posts, so nothing can be drawn, let alone posted, until a human has read the words.
+      It is the whole reason this is four commands instead of one.
+    </p>
+
+    <div class="note key">
+      <p class="note-title">The part worth knowing up front</p>
+      <p>
+        <code>plan</code> is the only command that talks to an API, and the only one
+        that costs money. You can skip it entirely. <code>brief</code> prints the exact
+        same request as text, you paste that into any Claude you already have, and
+        <code>import</code> takes the answer back. Same copy rules, same review gate,
+        no account needed.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Before you start</h2>
+    <p class="sub">Three things, and only one of them takes any real time.</p>
+
+    <dl class="needs">
+      <div>
+        <dt>Node 20 or newer</dt>
+        <dd>
+          Drives everything. <a href="https://nodejs.org/en/download">nodejs.org/en/download</a>
+          &mdash; take the LTS build. Check it with <code>node --version</code>.
+        </dd>
+      </div>
+      <div>
+        <dt>Python 3</dt>
+        <dd>
+          Draws the slides. <a href="https://www.python.org/downloads/">python.org/downloads</a>.
+          On Windows, tick <strong>Add python.exe to PATH</strong> in the installer &mdash;
+          it is off by default and nothing works without it.
+        </dd>
+      </div>
+      <div>
+        <dt>About 30 photos</dt>
+        <dd>Your own wallpapers. This is the real work &mdash; see step 4.</dd>
+      </div>
+    </dl>
+
+    <p>
+      No GitHub account, no git, no <code>npm install</code>. Everything else is
+      in the zip.
+    </p>
+  </section>
+
+  <section>
+    <h2>Windows: the two things that stop everyone</h2>
+    <p class="sub">
+      Neither is a bug in the tool. Both look like one. If you are on Windows, read
+      this before Setup and you will skip about half an hour.
+    </p>
+
+    <ol class="steps">
+      <li>
+        <div>
+          <h3>The zip unpacks into itself</h3>
+          <p>
+            Windows' built-in extractor makes a folder called
+            <code>drillr-social</code> and puts the real <code>drillr-social</code>
+            inside it. You end up one level too high, and Node says the file does not
+            exist:
+          </p>
+          <div class="cmd">
+            <div class="cmd-label">what you see</div>
+            <pre>Error: Cannot find module 'C:\Users\you\Desktop\drillr-social\slideshow.mjs'
+    code: 'MODULE_NOT_FOUND'</pre>
+          </div>
+          <p>
+            Run <code>dir</code>. If it lists another <code>drillr-social</code> instead
+            of <code>slideshow.mjs</code>, go one level deeper:
+          </p>
+          <div class="cmd">
+            <div class="cmd-label">terminal</div>
+            <pre>dir
+cd drillr-social
+node slideshow.mjs          <span class="c"># now it prints the command list</span></pre>
+          </div>
+        </div>
+      </li>
+
+      <li>
+        <div>
+          <h3>pip is not recognized</h3>
+          <div class="cmd">
+            <div class="cmd-label">what you see</div>
+            <pre>'pip' is not recognized as an internal or external command,
+operable program or batch file.</pre>
+          </div>
+          <p>
+            This almost never means Python is missing. It means it was installed
+            without being added to PATH, which is the default. Find out which:
+          </p>
+          <div class="cmd">
+            <div class="cmd-label">terminal</div>
+            <pre>py --version</pre>
+          </div>
+          <p>
+            If that prints a version, Python is on the machine and only PATH is wrong.
+            If it also fails, there is no Python yet. Either way the fix is the next
+            step.
+          </p>
+        </div>
+      </li>
+
+      <li>
+        <div>
+          <h3>Download the right installer</h3>
+          <p>
+            On <a href="https://www.python.org/downloads/">python.org/downloads</a>,
+            ignore the big yellow <strong>Download Python install manager</strong>
+            button. Take the plain standalone installer on the line underneath it, or
+            open the release page and scroll to <strong>Files</strong>:
+          </p>
+          <div class="cmd">
+            <div class="cmd-label">the row you want</div>
+            <pre>Windows installer (64-bit)    Recommended    ~32 MB</pre>
+          </div>
+        </div>
+      </li>
+
+      <li>
+        <div>
+          <h3>Tick the PATH box</h3>
+          <p>
+            On a fresh install, the first screen has <strong>Add python.exe to
+            PATH</strong> at the bottom. It is off by default. Tick it before clicking
+            Install Now. That single checkbox is the whole problem.
+          </p>
+          <p>
+            If the installer instead opens on <strong>Modify Setup</strong>, that
+            version is already on the machine and you just need to switch the option
+            on:
+          </p>
+          <div class="cmd">
+            <div class="cmd-label">click through</div>
+            <pre>Modify  ->  Next  ->  Advanced Options
+        ->  tick "Add Python to environment variables"
+        ->  Install</pre>
+          </div>
+        </div>
+      </li>
+
+      <li>
+        <div>
+          <h3>Open a new terminal and check</h3>
+          <p>
+            An already-open window keeps the old PATH forever. Close it, open a fresh
+            one, then:
+          </p>
+          <div class="cmd">
+            <div class="cmd-label">terminal</div>
+            <pre>python --version
+pip install Pillow</pre>
+          </div>
+          <p>
+            <code>python --version</code> has to print a version here. If it opens the
+            Microsoft Store instead, Windows' stub is shadowing the real thing: Settings
+            -> Apps -> Advanced app settings -> App execution aliases, and switch off
+            both <strong>python.exe</strong> and <strong>python3.exe</strong>.
+          </p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="note key">
+      <p class="note-title">Why PATH specifically, and not just pip</p>
+      <p>
+        Installing Pillow with <code>py -m pip install Pillow</code> works and is
+        tempting, but it only gets you past this one message. The tool runs the literal
+        command <code>python</code> when it draws slides and when it self-checks, so
+        with PATH still broken, <code>doctor</code> reports Pillow missing even though
+        you just installed it, and <code>render</code> fails outright. Fix PATH once and
+        both go away.
+      </p>
+      <p>
+        If you ended up installing a second version alongside an older one, run
+        <code>pip install Pillow</code> again after the PATH fix. Pillow went into the
+        old Python; <code>python</code> now points at the new one. Having both installed
+        is harmless.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Setup</h2>
+    <p class="sub">Do these in order. Ten minutes, plus however long you spend picking photos.</p>
+
+    <ol class="steps">
+      <li>
+        <div>
+          <h3>Unzip it</h3>
+          <p>
+            Extract <code>drillr-social.zip</code> anywhere you like. Open a terminal
+            in the folder it makes &mdash; every command below is run from there.
+          </p>
+          <div class="cmd">
+            <div class="cmd-label">terminal</div>
+            <pre>cd path/to/drillr-social
+node slideshow.mjs          <span class="c"># prints the command list</span></pre>
+          </div>
+          <p>
+            If that prints a list of commands, you are set. There is nothing to
+            install &mdash; the tool runs on Node's built-in modules alone, and the one
+            package listed in <code>package.json</code> is for <code>plan</code>, which
+            you are not using.
+          </p>
+        </div>
+      </li>
+
+      <li>
+        <div>
+          <h3>Install Pillow</h3>
+          <div class="cmd">
+            <div class="cmd-label">terminal</div>
+            <pre>pip install Pillow</pre>
+          </div>
+          <p>This is the image library that renders the slides. Nothing else to install.</p>
+        </div>
+      </li>
+
+      <li>
+        <div>
+          <h3>Fetch the fonts</h3>
+          <div class="cmd">
+            <div class="cmd-label">terminal</div>
+            <pre>node slideshow.mjs fonts</pre>
+          </div>
+          <p>
+            Pulls four candidate fonts from Google Fonts. They are not in the repo
+            because there is no reason to carry font binaries around when one command
+            gets them. The tool is set to <code>Fredoka</code> already, so you can move on.
+          </p>
+        </div>
+      </li>
+
+      <li>
+        <div>
+          <h3>Fill the photo pool</h3>
+          <p>
+            Drop images into two folders. Nothing downloads them &mdash; you choose
+            them, the tool rotates through them and remembers what it used.
+          </p>
+          <div class="cmd">
+            <div class="cmd-label">where they go</div>
+            <pre>backgrounds/players/    <span class="c">&larr; 20+ &mdash; the hook slide and all five numbered slides</span>
+backgrounds/stadiums/   <span class="c">&larr; 6+  &mdash; the app-mention slide only</span></pre>
+          </div>
+          <p>
+            jpg, png or webp. Portrait is ideal; a landscape shot gets centre-cropped
+            to 9:16, so skip anything with the subject far off to one side. Aim for
+            calm, wide shots in <code>stadiums/</code> &mdash; text has to sit on top of them.
+          </p>
+          <p>
+            You need real numbers here: the renderer refuses to repeat a background
+            inside one carousel, so a pool of six cannot fill a seven-slide post.
+          </p>
+        </div>
+      </li>
+
+      <li>
+        <div>
+          <h3>Check it over</h3>
+          <div class="cmd">
+            <div class="cmd-label">terminal</div>
+            <pre>node slideshow.mjs doctor</pre>
+          </div>
+          <p>
+            Prints every dependency, both photo counts, and what is in the queue.
+            A line reading <code>-- ANTHROPIC_API_KEY unset</code> is fine and expected
+            &mdash; that is the free path working as intended, not a problem to fix.
+          </p>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Making a carousel</h2>
+    <p class="sub">The loop you will actually run.</p>
+
+    <ol class="steps">
+      <li>
+        <div>
+          <h3>Get the brief</h3>
+          <div class="cmd">
+            <div class="cmd-label">terminal</div>
+            <pre>node slideshow.mjs brief --count 3</pre>
+          </div>
+          <p>
+            Prints a wall of text: what Drillr is, the copy rules, the format, and a
+            list of every hook already used so you do not repeat one. Copy the whole
+            thing.
+          </p>
+        </div>
+      </li>
+
+      <li>
+        <div>
+          <h3>Paste it into a chatbot</h3>
+          <p>
+            Claude, ChatGPT, Gemini, whatever you already use &mdash; the brief carries
+            all its own context, so nothing depends on which one. Free tiers are fine.
+            It comes back with a JSON array.
+          </p>
+
+          <div class="note key">
+            <p class="note-title">You have to create drafts.json yourself</p>
+            <p>
+              It is not in the zip and the tool never writes it. Make a new empty text
+              file, paste the whole JSON array into it, and save it as
+              <code>drafts.json</code> in the <strong>same folder as
+              <code>slideshow.mjs</code></strong> &mdash; the folder you unzipped and are
+              running the commands from, not <code>state/</code> and not
+              <code>out/</code>.
+            </p>
+            <div class="cmd">
+              <div class="cmd-label">where it goes</div>
+              <pre>drillr-social/
+  slideshow.mjs
+  drafts.json     <span class="c">&larr; you create this one</span>
+  backgrounds/
+  out/
+  state/</pre>
+            </div>
+            <p>
+              On Windows, make sure your editor does not quietly save it as
+              <code>drafts.json.txt</code>. If the next step says
+              <code>ENOENT: no such file or directory</code>, the file is either
+              somewhere else or named something else.
+            </p>
+          </div>
+
+          <p>
+            Do not bother tidying the reply. If it wraps the JSON in a sentence or a
+            code fence, the importer finds the array anyway.
+          </p>
+          <p>
+            Weaker models drift on the copy rules more, and the one rule that matters
+            most &mdash; sell the outcome, never list what the app contains &mdash; is
+            the one no automated check can catch. That is what the next two steps are for.
+          </p>
+        </div>
+      </li>
+
+      <li>
+        <div>
+          <h3>Import and read it</h3>
+          <div class="cmd">
+            <div class="cmd-label">terminal</div>
+            <pre>node slideshow.mjs import --from drafts.json</pre>
+          </div>
+          <p>
+            Prints each carousel as it queues it, and flags anything off &mdash; hype
+            words, invented statistics, a line over the character limit, a hook already
+            in the queue. Fix wording directly in <code>state/queue.json</code>; the
+            text fields are all free text.
+          </p>
+        </div>
+      </li>
+
+      <li>
+        <div>
+          <h3>Approve</h3>
+          <div class="cmd">
+            <div class="cmd-label">terminal</div>
+            <pre>node slideshow.mjs list          <span class="c"># see the queue</span>
+node slideshow.mjs approve all</pre>
+          </div>
+          <p>
+            This is the gate. Nothing renders until you do this, and doing it means
+            you read the copy.
+          </p>
+        </div>
+      </li>
+
+      <li>
+        <div>
+          <h3>Render</h3>
+          <div class="cmd">
+            <div class="cmd-label">terminal</div>
+            <pre>node slideshow.mjs render</pre>
+          </div>
+          <p>
+            Writes <code>out/&lt;id&gt;/01.jpg</code> through <code>07.jpg</code> at
+            1080&times;1920, plus a <code>caption.txt</code> with the hashtags already
+            attached. That folder is the finished post.
+          </p>
+        </div>
+      </li>
+
+      <li>
+        <div>
+          <h3>Post it, then close the loop</h3>
+          <div class="cmd">
+            <div class="cmd-label">terminal</div>
+            <pre>node slideshow.mjs publish &lt;id&gt; --manual</pre>
+          </div>
+          <p>
+            Upload the folder to TikTok by hand, then run this. It does not talk to
+            TikTok &mdash; it marks the post done so its hook joins the
+            do-not-repeat list next time you run <code>brief</code>.
+          </p>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>What does not work yet</h2>
+    <p class="sub">So you do not go hunting for a bug that is not there.</p>
+
+    <div class="note caution">
+      <p class="note-title">Automatic posting is off</p>
+      <p>
+        <code>publish</code> without <code>--manual</code> is a dry run. It prints what
+        it would have sent and stops. This is deliberate and the blockers are TikTok's:
+        photo carousels can only be pulled from a domain verified in TikTok's developer
+        portal, and until an app passes their audit every post lands visible only to
+        the poster. Uploading by hand is the current answer.
+      </p>
+    </div>
+
+    <div class="note caution">
+      <p class="note-title">The slide order looks wrong but is not</p>
+      <p>
+        Slides run <code>hook &rarr; 1 &rarr; 2 &rarr; 3 &rarr; 4 &rarr; app mention &rarr; 5</code>.
+        The app mention is slide six, not seven, so the plug lands mid-swipe and the
+        carousel ends on content rather than an advert. Leave it.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2>If something breaks</h2>
+    <p class="sub">The three things that actually go wrong.</p>
+
+    <details>
+      <summary>import says ENOENT: no such file or directory</summary>
+      <div class="inner">
+        <p>
+          There is no <code>drafts.json</code> where the tool looked. You create that
+          file yourself &mdash; nothing in the zip ships one and no command writes it.
+          It belongs beside <code>slideshow.mjs</code>, in the folder you run the
+          commands from.
+        </p>
+        <p>
+          The path in the error message is exactly where it was expected, so compare it
+          against where you actually saved the file. On Windows, check the name is not
+          <code>drafts.json.txt</code>.
+        </p>
+      </div>
+    </details>
+
+    <details>
+      <summary>render says a background pool is too small</summary>
+      <div class="inner">
+        <p>
+          You have fewer photos than slides. Add more to
+          <code>backgrounds/players/</code>. Run <code>doctor</code> to see the counts
+          and how many have never been used.
+        </p>
+      </div>
+    </details>
+
+    <details>
+      <summary>render.py failed</summary>
+      <div class="inner">
+        <p>
+          Almost always Pillow missing. Check with <code>python -c "import PIL"</code>
+          &mdash; silence means it is fine, an error means run
+          <code>pip install Pillow</code> again and read what it says.
+        </p>
+        <p>
+          On Windows there is a second cause: typing <code>python</code> opens the
+          Microsoft Store instead of running anything. That means Python is not properly
+          on your path &mdash; reinstall from python.org with
+          <strong>Add python.exe to PATH</strong> ticked.
+        </p>
+      </div>
+    </details>
+
+    <details>
+      <summary>nothing approved / nothing rendered</summary>
+      <div class="inner">
+        <p>
+          Not an error. It is the state machine telling you the previous step has not
+          been done. Run <code>list</code> to see where each post has got to.
+        </p>
+      </div>
+    </details>
+
+    <details>
+      <summary>import skipped one of my carousels</summary>
+      <div class="inner">
+        <p>
+          Either it had no hook, or that hook is already in the queue. It prints which
+          and why. Duplicates get skipped rather than queued twice.
+        </p>
+      </div>
+    </details>
+  </section>
+
+  <footer>
+    <p>
+      There is a <code>README.md</code> in the zip with the rest of it &mdash; the full
+      copy rules, and what turning on auto-posting would take.
+    </p>
+  </footer>
+
+</div>
+
+</body>
+</html>

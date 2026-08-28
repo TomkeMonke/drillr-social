@@ -229,8 +229,21 @@ function brief() {
   );
 
   console.log(`\n---\n`);
-  console.log('Save the reply to drafts.json, then:');
+  console.log('Paste everything above into any assistant you already use - Claude,');
+  console.log('ChatGPT, Gemini, whichever. The brief carries all of its own context,');
+  console.log('so nothing depends on which one, and a free tier is fine.');
+  console.log('');
+  console.log('It replies with a JSON array. Nothing here ships a drafts.json and');
+  console.log('import will not invent one - CREATE that file yourself, here:');
+  console.log('');
+  console.log(`  ${path.join(REPO, 'drafts.json')}`);
+  console.log('');
+  console.log('Paste the array into it, save, then:');
   console.log('  node slideshow.mjs import --from drafts.json');
+  console.log('');
+  console.log('The name is only a convention - --from takes any path, resolved');
+  console.log('against the repo root. To skip the file, pipe the reply in instead:');
+  console.log('  node slideshow.mjs import        (reads stdin)');
 }
 
 /**

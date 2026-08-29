@@ -1,0 +1,114 @@
+{
+  "_comment": [
+    "THE REAL CORPUS. Transcribed off 32 slides of actual @drillr_app posts,",
+    "2026-05-30 to 2026-06-27, supplied by tomek 2026-08-29. These are not",
+    "invented exemplars - every line here went out on the account.",
+    "",
+    "They are injected into the system prompt as THE TARGET VOICE. This is the",
+    "highest-leverage file in the repo: the model copies rhythm from examples far",
+    "more reliably than it follows an adjective in a rule.",
+    "",
+    "WHAT THE CORPUS ACTUALLY SHOWS - and it contradicted the old prompt:",
+    "",
+    "1. NOT ONE item is position-specific. The content slides are broad football",
+    "   mentality and lifestyle - sleep, food, motivation, work ethic, fear,",
+    "   comparison. The POSITIONING lives entirely in the fixed app slide ('made",
+    "   for your position'). Content buys reach, the CTA does the selling. The old",
+    "   prompt demanded position-specific conditioning in every item, which is why",
+    "   its drafts never sounded like the account.",
+    "",
+    "2. Two hook formulas, both career-stakes, nothing else: the THREAT ('will",
+    "   kill your football career', 'never go pro') and the PROOF ('signs that you",
+    "   will go pro'). No tips, no how-tos, no listicles about drills.",
+    "",
+    "3. Two item shapes, never mixed inside one carousel: SHORT bare habits",
+    "   (22-50 chars) and LABEL AND COST ('<habit>: <what it costs you>', 60-95",
+    "   chars). See the `shape` field on each entry.",
+    "",
+    "4. The account mixes gerunds ('Eating junk food') and second person ('You",
+    "   skip stretching') freely inside one set. That is not sloppiness to fix.",
+    "",
+    "5. Items are allowed to be moral and abstract. 'You have talent but no work",
+    "   ethic' is a real post. The line the corpus never crosses is the bare TRAIT",
+    "   label - it always names a behaviour, never 'you lack discipline'.",
+    "",
+    "⚠️ TWO THINGS TO DECIDE, tomek:",
+    "- 'small-habits' item 1 is the Gooning slide. Kept verbatim because this file",
+    "  is a record of what ran, but it is the account's edgiest register and it is",
+    "  now teaching the model that register. Delete that one item if you do not",
+    "  want it drafted toward. The prompt does tell the model not to reuse topics.",
+    "- The 'small-habits' carousel renders 5-6 lines per slide. render.py caps at",
+    "  MAX_LINES = 4, so the LABEL AND COST shape cannot currently render the way",
+    "  it originally did. Raise MAX_LINES to 6 or leave that shape out.",
+    "",
+    "⚠️ The `caption` fields are NOT transcribed - the export was slides only, no",
+    "post text. They are filled with the config.json default so the shape of the",
+    "example is complete. Replace them the moment you have the real captions,",
+    "because right now they teach the model that every caption is 'lock in'.",
+    "",
+    "A sixth carousel (2026-05-30, same hook as 'kill-career') was in the folder",
+    "with its item 1 slide missing, so it is not included. Its app slide read",
+    "'Tip: that's why I started using Drillr to track my nutrition and training to",
+    "stay locked in' - a first-person testimonial variant of the CTA now pinned in",
+    "config.json. Worth knowing that variant existed if the CTA is ever revisited.",
+    "",
+    "itemCount: these all carry five items because config.itemCount is 5. If you",
+    "change that, the prompt still asks for the right number - the examples are",
+    "allowed to disagree and the prompt says so explicitly."
+  ],
+
+  "examples": [
+    {
+      "shape": "short",
+      "posted": "2026-06-16",
+      "hook": "5 things that will kill your football career",
+      "items": [
+        "Not getting enough sleep",
+        "Eating a lot junk food",
+        "You only train when you're motivated",
+        "You skip exercising and stretching",
+        "Comparing yourself to others"
+      ],
+      "caption": "lock in"
+    },
+    {
+      "shape": "short",
+      "posted": "2026-06-27",
+      "hook": "5 reasons you will never go pro in football",
+      "items": [
+        "You only train when you feel like it",
+        "You blame everyone else for your mistakes",
+        "You have talent but no work ethic",
+        "You skip stretching and recovery",
+        "You always play it safe because you're scared"
+      ],
+      "caption": "lock in"
+    },
+    {
+      "shape": "short",
+      "posted": "2026-06-02",
+      "hook": "5 signs that you will go pro in football",
+      "items": [
+        "You train even if you're not motivated",
+        "You watch football to learn not just for fun",
+        "You care about your diet and recovery",
+        "You train your weaknesses not just your strengths",
+        "You analyse your performance after a match/training"
+      ],
+      "caption": "lock in"
+    },
+    {
+      "shape": "label and cost",
+      "posted": "2026-05-31",
+      "hook": "Small habits that are holding you back from improving",
+      "items": [
+        "Gooning Kills motivation, makes you feel like your goals are boring and worthless",
+        "Not getting enough sleep: Ruins your recovery and makes you disoriented and less productive",
+        "Eating junk food: Slows muscle growth",
+        "Not warming up properly: You risk getting an injury and it reduces your strength",
+        "Comparing yourself to others: Destroys your confidence which leads to poor performance"
+      ],
+      "caption": "lock in"
+    }
+  ]
+}

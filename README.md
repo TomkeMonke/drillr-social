@@ -229,14 +229,41 @@ for your position"). Content buys the reach, the CTA does the selling. The old
 prompt demanded position-specific conditioning in every item, which is why its
 drafts never sounded like the account.
 
-The corpus also fixes the two hook formulas (the **threat** - "5 things that will
-kill your football career"; the **proof** - "5 signs that you will go pro"), and
-the two item shapes, which are never mixed inside one carousel:
+The corpus also fixes the two hook formulas: the **threat** ("5 things that will
+kill your football career") and the **proof** ("5 signs that you will go pro").
 
-    SHORT           a bare habit, 22-50 chars    You only train when you feel like it
-    LABEL AND COST  habit: what it costs, 60-95  Not warming up properly: You risk getting an injury
+Items are one shape only - the bare habit, 22-50 characters, **no colon**:
 
-`lint` warns on a set that mixes them.
+    You only train when you feel like it
+    Not getting enough sleep
+    Comparing yourself to others
+
+A "`<habit>: <what it costs>`" shape ran once, on 2026-05-31, and is retired. It
+doubles the line length, so the autofit renders it at about half the size, and it
+needs 5-6 lines where `render.py` caps at `MAX_LINES = 4`. That carousel is kept
+in `references/examples.json` under `archive`, which is **not** injected into the
+prompt - moving an entry between `examples` and `archive` is the whole mechanism
+for turning a pattern on or off. `lint` warns on any colon in an item so it
+cannot creep back.
+
+Slide 6, the fixed app mention, keeps its own colon ("Tip: start using..."). It
+is not an item and never goes through `lint`.
+
+### Repeating a hook
+
+`config.copy.repeatHooks` (default `true`) allows the same hook to run more than
+once. The account already does it - "5 things that will kill your football
+career" went out on 2026-05-30 and again on 2026-06-16 with a different set of
+items - so forbidding it was the tool disagreeing with the feed.
+
+Previous hooks are still shown to the model either way; the flag decides whether
+they read as context or as a ban. With repeats on, `import` queues a duplicate
+and prints `= "<hook>" has been used before - queued anyway` rather than dropping
+it, and `makeId` keeps the ids apart (a same-day repeat gets a `-2` suffix).
+
+Set it to `false` to restore the original behaviour exactly: the prompt forbids
+repeating an angle or writing a near-synonym, and `import` silently skips any
+draft whose hook is already in the queue. One value, nothing else to edit.
 
 ### Length is a rendering decision
 
@@ -248,12 +275,8 @@ nothing else. Measured on the real template with Archivo Black at 1080x1920:
 An item at 40 characters renders about **70% larger** than the same item at 70,
 and roughly double one at 80. That is why `lint` reports length as "renders
 roughly half the size of a 40-char line" rather than as a character cap - the cap
-is not the point, the type size is.
-
-**Known gap:** the LABEL AND COST shape wants 5-6 lines and `render.py` caps at
-`MAX_LINES = 4`, so that shape cannot currently render the way the original
-`small-habits` post did. Raise `MAX_LINES` to 6 or stay on the short shape;
-`lint` flags any long-form set so it cannot surprise you at render time.
+is not the point, the type size is. It is also the main argument against the
+retired colon shape: the consequence half is bought entirely out of type size.
 
 ## Turning on auto-post
 

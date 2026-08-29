@@ -50,7 +50,7 @@ import * as pool from './lib/backgrounds.mjs';
 import * as clipboard from './lib/clipboard.mjs';
 // Safe to import at the top level: houserules.mjs has no dependencies, unlike
 // copy.mjs, which is loaded lazily inside `plan` so the SDK stays optional.
-import { systemFor, normalise, lint } from './lib/houserules.mjs';
+import { systemFor, buildAsk, normalise, lint } from './lib/houserules.mjs';
 
 const DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPO = DIR; // standalone repo: the tool root IS the repo root
@@ -68,6 +68,12 @@ const has = (name) => args.includes(`--${name}`);
 // Flags that consume the next argument, so `--topic recovery` does not leave
 // "recovery" looking like a post id.
 const VALUED = new Set(['count', 'topic', 'from']);
+
+// Repeating a hook is allowed unless config turns it off. Defaulting a missing
+// key to `true` is deliberate: the account has always reposted hooks, so a
+// config that predates the setting should get the behaviour that matches what
+// actually ran, not the stricter one.
+const repeatHooksEnabled = () => CONFIG.copy?.repeatHooks !== false;
 const positional = [];
 for (let i = 1; i < args.length; i += 1) {
   if (args[i].startsWith('--')) {
@@ -136,6 +142,7 @@ async function plan() {
     itemCount: CONFIG.itemCount,
     topic,
     recentHooks,
+    repeatHooks: repeatHooksEnabled(),
     model: CONFIG.copy.model,
     effort: CONFIG.copy.effort,
   });
@@ -210,19 +217,7 @@ function buildBrief({ count, topic }) {
 
   const parts = [systemFor(CONFIG.itemCount), '\n---\n'];
 
-  parts.push(
-    `Draft ${count} distinct carousel${count === 1 ? '' : 's'}. ` +
-      (topic ? `Theme: ${topic}. ` : '') +
-      `Vary the shape across the set - a mistakes list, a habits list, a signs ` +
-      `list and a reasons list all read differently in the feed.`
-  );
-
-  if (recentHooks.length) {
-    parts.push(
-      `\nAlready posted or queued - do not repeat these angles, and do not write a near-synonym of one:\n` +
-        recentHooks.map((h) => `- ${h}`).join('\n')
-    );
-  }
+  parts.push(buildAsk({ count, topic, recentHooks, repeatHooks: repeatHooksEnabled() }));
 
   parts.push(
     `\nReply with nothing but a JSON array of ${count} object(s), each exactly:\n` +
@@ -385,8 +380,15 @@ function queueDrafts(parsed) {
       continue;
     }
     if (seen.has(draft.hook.toLowerCase())) {
-      console.log(`  ! skipped "${draft.hook}" - that hook is already in the queue`);
-      continue;
+      if (!repeatHooksEnabled()) {
+        console.log(`  ! skipped "${draft.hook}" - hook already used (config.copy.repeatHooks is false)`);
+        continue;
+      }
+      // Queued anyway, but said out loud. A repeat is usually intentional here
+      // and sometimes it is the model being lazy, and only the person reading
+      // the review gate can tell which - so this informs rather than decides.
+      // makeId already keeps the ids apart, including two on the same day.
+      console.log(`  = "${draft.hook}" has been used before - queued anyway`);
     }
 
     const post = {

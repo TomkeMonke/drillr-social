@@ -78,6 +78,21 @@
   },
 
   "copy": {
+    "_comment": [
+      "repeatHooks: may a hook be used more than once?",
+      "",
+      "true (current) - yes. The account already does it: '5 things that will kill",
+      "your football career' ran on 2026-05-30 and again on 2026-06-16 with a",
+      "different set of items. Previous hooks are still shown to the model, as",
+      "context rather than as a ban, so it can reuse one deliberately or vary away",
+      "from it. `import` queues a repeat and notes it instead of skipping it.",
+      "",
+      "false - the original behaviour. The prompt forbids repeating an angle or",
+      "writing a near-synonym of one, and `import` silently drops any draft whose",
+      "hook is already in the queue. Flip this one value to get all of that back;",
+      "nothing else needs editing."
+    ],
+    "repeatHooks": true,
     "model": "claude-opus-5",
     "effort": "high"
   },

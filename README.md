@@ -26,6 +26,11 @@ CTA last instead.
     plan  ->  approve  ->  render  ->  publish
     Claude    you        Pillow      TikTok API
 
+`node slideshow.mjs go` walks all of that interactively in one command, and is
+the fastest way in - see [Writing the copy without an API
+key](#writing-the-copy-without-an-api-key). The four verbs below are what it
+calls, and what you want in a script.
+
 Four steps rather than one command, because of the middle one. `approve` is a
 human reading the copy before anything is drawn, and the state machine in
 `lib/queue.mjs` makes it unskippable: `render` only looks at `approved` posts
@@ -142,48 +147,113 @@ here that costs money. An API key bills from a **console.anthropic.com** balance
 which is a separate pool from a Claude.ai subscription - a Pro or Max plan grants
 no API credit, and usage credits on claude.ai cannot be spent by a key.
 
-So there is a second path that costs nothing. `brief` prints the exact request
-`plan` would have sent - same system prompt, same do-not-repeat list, same output
-shape - and `import` queues whatever comes back:
+There are two free paths, and neither of them needs the SDK installed.
+
+### `go` - the whole loop, one command
 
 ```bash
-node slideshow.mjs brief --count 3            # paste this into any assistant you use
-#                                             # -> save the JSON reply as drafts.json
-node slideshow.mjs import --from drafts.json  # queue the reply
-node slideshow.mjs approve all                # same gate as always
+node slideshow.mjs go        # or: npm start
 ```
 
-Paste the brief into whichever assistant you already have open - Claude, ChatGPT,
-Gemini, whatever. It carries all of its own context, so nothing depends on which
-one, and a free tier is fine.
+It copies the brief to your clipboard, waits while you paste it into whatever
+assistant you already have open, reads the reply back off the clipboard, queues
+it, walks you through the copy one post at a time, and renders what you approve.
+Four verbs and a hand-made JSON file collapse into one command and a keystroke.
 
-**`drafts.json` is a file you create.** The repo does not ship one and `import`
-will not invent it - `--from drafts.json` on a folder without it just fails with
-`ENOENT`. Save the JSON array the assistant replies with to the **repo root**,
-next to `slideshow.mjs`:
+`go` does **not** weaken the review gate. It walks the same state machine as
+everything else and stops on every draft to print the copy and wait for `y`, so
+a set nobody has read still cannot render. Non-interactive shells are refused
+outright, which is what stops a cron job from ever inheriting a pipe and
+auto-approving itself.
+
+### `/carousel` - inside Claude Code, no paste at all
+
+`.claude/commands/carousel.md` makes the assistant that is already in the repo
+do the drafting:
 
 ```
-drillr-social/drafts.json
+/carousel 3
+/carousel 2 --topic recovery
 ```
 
-The name is only a convention: `--from` takes any path, resolved against the repo
-root. The file is not gitignored, so it will show as untracked until you delete it.
+It runs `brief --raw`, writes the carousels to `drafts.json`, imports them, reads
+the lint back, and stops at the gate. Same house rules, same corpus, same queue -
+it just skips the clipboard round trip entirely. It is told, in the command file,
+that it may never approve its own copy.
 
-`import` also reads stdin, so `... | node slideshow.mjs import` works - that skips
-the file entirely. It does not
-mind a reply wrapped in prose or a ```` ```json ```` fence - it pulls the array out.
-Imported copy goes through the same `normalise` clean-up as `plan` (smart quotes,
-em dashes, terminal periods, stray `1.` numbering) plus a lint pass that flags
-hype vocabulary, invented statistics, emoji and Americanisms.
+### The pieces, if you want them separately
+
+```bash
+node slideshow.mjs brief --count 3   # brief -> clipboard (and stdout)
+node slideshow.mjs brief --raw       # brief -> stdout only, for piping
+node slideshow.mjs import            # reply <- clipboard
+node slideshow.mjs import --from drafts.json
+... | node slideshow.mjs import      # reply <- stdin
+```
+
+`import` resolves its source in that order: `--from` wins, then `--paste`, then a
+piped stdin, then the clipboard. The clipboard default is why **you no longer
+need to create `drafts.json`** - that file was the first thing every new machine
+tripped over, because nothing ships one and `--from drafts.json` on a fresh clone
+fails with `ENOENT`. It still works if you prefer a file.
+
+It does not mind a reply wrapped in prose or a ```` ```json ```` fence - it pulls
+the array out. Imported copy goes through the same `normalise` clean-up as `plan`
+(smart quotes, em dashes, terminal periods, stray `1.` numbering) plus a lint
+pass. As of the corpus rewrite `plan` runs that lint too; it used to check
+hand-carried copy only.
 
 Two deliberate limits:
 
 - Everything lands as `draft`, never `approved`. Pasting a model's reply into a
   file is not a human reading the copy - it is the same unreviewed output `plan`
   produces, carried by hand. The gate still has to be walked through.
-- The house rules live in `lib/houserules.mjs`, imported by both paths. That file
-  has no dependencies on purpose: the free path must not need the SDK installed.
-  Change the style there and both paths change together.
+- The house rules live in `lib/houserules.mjs`, imported by every path. That file
+  has no npm dependencies on purpose: the free paths must not need the SDK
+  installed. Change the style there and all three paths change together.
+
+## The voice, and where it comes from
+
+`references/examples.json` holds **20 slides of real @drillr_app posts**,
+transcribed off the images, and they are injected into the system prompt as
+few-shot examples. This is the highest-leverage file in the repo - a model copies
+rhythm from examples far more reliably than it follows an adjective in a rule.
+
+Read that file's `_comment` before changing the prompt. The corpus contradicted
+the original prompt on the single biggest point:
+
+**Not one item in any real post is position-specific.** The content slides are
+broad football mentality - sleep, food, motivation, work ethic, fear, comparing
+yourself to others. All of the positioning lives in the fixed app slide ("made
+for your position"). Content buys the reach, the CTA does the selling. The old
+prompt demanded position-specific conditioning in every item, which is why its
+drafts never sounded like the account.
+
+The corpus also fixes the two hook formulas (the **threat** - "5 things that will
+kill your football career"; the **proof** - "5 signs that you will go pro"), and
+the two item shapes, which are never mixed inside one carousel:
+
+    SHORT           a bare habit, 22-50 chars    You only train when you feel like it
+    LABEL AND COST  habit: what it costs, 60-95  Not warming up properly: You risk getting an injury
+
+`lint` warns on a set that mixes them.
+
+### Length is a rendering decision
+
+The renderer auto-fits every line, so character count decides type size and
+nothing else. Measured on the real template with Archivo Black at 1080x1920:
+
+    40 chars -> 143px      60 chars -> 102px      80 chars -> ~71px
+
+An item at 40 characters renders about **70% larger** than the same item at 70,
+and roughly double one at 80. That is why `lint` reports length as "renders
+roughly half the size of a 40-char line" rather than as a character cap - the cap
+is not the point, the type size is.
+
+**Known gap:** the LABEL AND COST shape wants 5-6 lines and `render.py` caps at
+`MAX_LINES = 4`, so that shape cannot currently render the way the original
+`small-habits` post did. Raise `MAX_LINES` to 6 or stay on the short shape;
+`lint` flags any long-form set so it cannot surprise you at render time.
 
 ## Turning on auto-post
 
@@ -254,10 +324,14 @@ leaving a dead token in place.
     assets/           the two promo-slide overlays
     render.py         Pillow renderer; the whole look lives here
     config.json       template tuning, CTA text, hashtags, TikTok settings
-    lib/copy.mjs      Claude drafting + the brand prompt
+    references/examples.json  20 slides of real posts - the few-shot corpus
+    lib/houserules.mjs    the system prompt, the clean-up and the lint
+    lib/copy.mjs      Claude drafting over the API (the only paid path)
+    lib/clipboard.mjs cross-platform clipboard I/O for the free path
     lib/queue.mjs     the draft->approved->rendered->posted state machine
     lib/backgrounds.mjs   pool rotation + the used-image ledger
     lib/tiktok.mjs    Content Posting API
+    .claude/commands/carousel.md   the /carousel slash command
     backgrounds/      wallpapers you supply (gitignored)
     state/            queue.json + backgrounds-used.json (committed - this is the memory)
     out/              rendered slides (gitignored)

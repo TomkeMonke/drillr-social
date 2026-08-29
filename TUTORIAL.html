@@ -378,10 +378,10 @@
       <p class="note-title">The part worth knowing up front</p>
       <p>
         <code>plan</code> is the only command that talks to an API, and the only one
-        that costs money. You can skip it entirely. <code>brief</code> prints the exact
-        same request as text, you paste that into any Claude you already have, and
-        <code>import</code> takes the answer back. Same copy rules, same review gate,
-        no account needed.
+        that costs money. You can skip it entirely. <code>node slideshow.mjs go</code>
+        hands you the exact same request on your clipboard, you paste it into any
+        chatbot you already have, and it reads the answer back off the clipboard.
+        Same copy rules, same review gate, no account needed.
       </p>
     </div>
   </section>
@@ -653,6 +653,26 @@ backgrounds/stadiums/   <span class="c">&larr; 6+  &mdash; the app-mention slide
     <h2>Making a carousel</h2>
     <p class="sub">The loop you will actually run.</p>
 
+    <div class="note key">
+      <p class="note-title">Start here: one command does all of it</p>
+      <div class="cmd">
+        <div class="cmd-label">terminal</div>
+        <pre>node slideshow.mjs go</pre>
+      </div>
+      <p>
+        It puts the brief on your clipboard, waits while you paste it into a chatbot,
+        reads the reply straight back off your clipboard, shows you each carousel, and
+        renders the ones you approve. No files to create, nothing to copy out of the
+        terminal window.
+      </p>
+      <p>
+        It still stops and asks before anything renders. You type <code>y</code> to
+        approve a carousel or press Enter to leave it as a draft. Everything below is
+        the same loop done a step at a time, which is worth reading once so you know
+        what <code>go</code> is doing on your behalf.
+      </p>
+    </div>
+
     <ol class="steps">
       <li>
         <div>
@@ -662,9 +682,10 @@ backgrounds/stadiums/   <span class="c">&larr; 6+  &mdash; the app-mention slide
             <pre>node slideshow.mjs brief --count 3</pre>
           </div>
           <p>
-            Prints a wall of text: what Drillr is, the copy rules, the format, and a
-            list of every hook already used so you do not repeat one. Copy the whole
-            thing.
+            Prints what Drillr is, the copy rules, real past posts as examples, and a
+            list of every hook already used so you do not repeat one. It also puts the
+            whole thing on your clipboard, so there is nothing to select out of the
+            terminal.
           </p>
         </div>
       </li>
@@ -673,45 +694,17 @@ backgrounds/stadiums/   <span class="c">&larr; 6+  &mdash; the app-mention slide
         <div>
           <h3>Paste it into a chatbot</h3>
           <p>
-            Claude, ChatGPT, Gemini, whatever you already use &mdash; the brief carries
+            Claude, ChatGPT, Gemini, whatever you already use - the brief carries
             all its own context, so nothing depends on which one. Free tiers are fine.
-            It comes back with a JSON array.
+            It comes back with a JSON array. Copy the whole reply.
           </p>
-
-          <div class="note key">
-            <p class="note-title">You have to create drafts.json yourself</p>
-            <p>
-              It is not in the zip and the tool never writes it. Make a new empty text
-              file, paste the whole JSON array into it, and save it as
-              <code>drafts.json</code> in the <strong>same folder as
-              <code>slideshow.mjs</code></strong> &mdash; the folder you unzipped and are
-              running the commands from, not <code>state/</code> and not
-              <code>out/</code>.
-            </p>
-            <div class="cmd">
-              <div class="cmd-label">where it goes</div>
-              <pre>drillr-social/
-  slideshow.mjs
-  drafts.json     <span class="c">&larr; you create this one</span>
-  backgrounds/
-  out/
-  state/</pre>
-            </div>
-            <p>
-              On Windows, make sure your editor does not quietly save it as
-              <code>drafts.json.txt</code>. If the next step says
-              <code>ENOENT: no such file or directory</code>, the file is either
-              somewhere else or named something else.
-            </p>
-          </div>
-
           <p>
-            Do not bother tidying the reply. If it wraps the JSON in a sentence or a
+            Do not bother tidying it. If it wraps the JSON in a sentence or a
             code fence, the importer finds the array anyway.
           </p>
           <p>
             Weaker models drift on the copy rules more, and the one rule that matters
-            most &mdash; sell the outcome, never list what the app contains &mdash; is
+            most - sell the outcome, never list what the app contains - is
             the one no automated check can catch. That is what the next two steps are for.
           </p>
         </div>
@@ -722,14 +715,33 @@ backgrounds/stadiums/   <span class="c">&larr; 6+  &mdash; the app-mention slide
           <h3>Import and read it</h3>
           <div class="cmd">
             <div class="cmd-label">terminal</div>
-            <pre>node slideshow.mjs import --from drafts.json</pre>
+            <pre>node slideshow.mjs import</pre>
           </div>
           <p>
-            Prints each carousel as it queues it, and flags anything off &mdash; hype
-            words, invented statistics, a line over the character limit, a hook already
-            in the queue. Fix wording directly in <code>state/queue.json</code>; the
-            text fields are all free text.
+            With no arguments it reads your clipboard, which is where the reply already
+            is. Prints each carousel as it queues it, and flags anything off - hype
+            words, invented statistics, a line long enough to render small, a set that
+            mixes the two item shapes, a hook already in the queue. Fix wording directly
+            in <code>state/queue.json</code>; the text fields are all free text.
           </p>
+
+          <div class="note">
+            <p class="note-title">You no longer need drafts.json</p>
+            <p>
+              It used to be required, it is not any more, and it was the first thing
+              every new machine tripped over: nothing ships one, so
+              <code>--from drafts.json</code> on a fresh copy failed with
+              <code>ENOENT</code> and looked like a broken tool. The clipboard is now
+              the default.
+            </p>
+            <p>
+              The file still works if you prefer one. Save the JSON array next to
+              <code>slideshow.mjs</code> and run
+              <code>node slideshow.mjs import --from drafts.json</code>. On Windows,
+              check your editor did not quietly save it as
+              <code>drafts.json.txt</code>.
+            </p>
+          </div>
         </div>
       </li>
 
@@ -810,18 +822,24 @@ node slideshow.mjs approve all</pre>
     <p class="sub">The three things that actually go wrong.</p>
 
     <details>
-      <summary>import says ENOENT: no such file or directory</summary>
+      <summary>import says no such file, or the clipboard is empty</summary>
       <div class="inner">
         <p>
-          There is no <code>drafts.json</code> where the tool looked. You create that
-          file yourself &mdash; nothing in the zip ships one and no command writes it.
-          It belongs beside <code>slideshow.mjs</code>, in the folder you run the
-          commands from.
+          Easiest fix: drop the <code>--from</code> and run
+          <code>node slideshow.mjs import</code> on its own. With no arguments it reads
+          your clipboard, so there is no file to get wrong.
         </p>
         <p>
-          The path in the error message is exactly where it was expected, so compare it
-          against where you actually saved the file. On Windows, check the name is not
-          <code>drafts.json.txt</code>.
+          If you do want the file, you create it yourself - nothing ships one and no
+          command writes it. It belongs beside <code>slideshow.mjs</code>, in the folder
+          you run the commands from. The path in the error message is exactly where it
+          was expected, so compare it against where you saved it. On Windows, check the
+          name is not <code>drafts.json.txt</code>.
+        </p>
+        <p>
+          "clipboard is empty" or "the clipboard still holds the brief" means the copy
+          did not take. Go back to the chatbot, select its whole reply, copy, and run
+          the command again.
         </p>
       </div>
     </details>

@@ -5,6 +5,8 @@
   "type": "module",
   "description": "Generates and schedules the @drillr_app TikTok photo carousels",
   "scripts": {
+    "go": "node slideshow.mjs go",
+    "start": "node slideshow.mjs go",
     "doctor": "node slideshow.mjs doctor",
     "fonts": "node slideshow.mjs fonts",
     "plan": "node slideshow.mjs plan",

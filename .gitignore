@@ -17,3 +17,6 @@ state/.refresh-token
 
 node_modules/
 package-lock.json
+
+# render.py gets imported by tooling occasionally; never commit the bytecode
+__pycache__/

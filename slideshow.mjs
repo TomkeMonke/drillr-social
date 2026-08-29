@@ -1,14 +1,18 @@
 // Drillr TikTok carousel pipeline.
 //
+//   node slideshow.mjs go                  # the whole free loop, one command
+//
 //   node slideshow.mjs doctor              # is everything wired up
 //   node slideshow.mjs fonts               # fetch candidate fonts (one-off)
 //   node slideshow.mjs plan --count 3      # Claude drafts 3 carousels (API key)
-//   node slideshow.mjs brief --count 3     # print that same ask, to paste anywhere (free)
-//   node slideshow.mjs import --from x.json  # queue drafts written by hand (free)
+//   node slideshow.mjs brief --count 3     # copy that same ask to the clipboard (free)
+//   node slideshow.mjs brief --raw         # print it bare, for a script to pipe
+//   node slideshow.mjs import              # queue the reply from the clipboard (free)
+//   node slideshow.mjs import --from x.json  # ... or from a file, or stdin
 //   node slideshow.mjs list                # what is in the queue
 //   node slideshow.mjs edit <id>           # print one draft for editing
 //   node slideshow.mjs approve <id|all>    # the review gate
-//   node slideshow.mjs render [id]         # approved -> JPGs in out/
+//   node slideshow.mjs render [id|all]     # approved -> JPGs in out/
 //   node slideshow.mjs publish [id]        # rendered -> TikTok (dry run)
 //   node slideshow.mjs publish [id] --commit
 //
@@ -17,11 +21,17 @@
 // can be posted, until a human has read the copy. That is the whole reason
 // `plan` does not just render.
 //
+// `go` does NOT weaken that gate. It walks the same state machine and stops on
+// every draft to print the copy and wait for a keystroke - the gate moves from
+// "run a second command" to "press y", and a set nobody looks at still cannot
+// render. Non-interactive shells are refused outright so CI can never drive it.
+//
 // `plan` is the only verb that calls the API and the only one that costs
-// anything. `brief` + `import` are the same step done by hand: `brief` prints
-// the exact ask, you paste it into whatever Claude you already pay for, and
-// `import` queues the result through the same clean-up and the same gate. The
-// pipeline cannot tell the two paths apart downstream.
+// anything. `brief` + `import` are the same step done by hand: `brief` puts the
+// exact ask on your clipboard, you paste it into whatever assistant you already
+// have, and `import` reads the reply back off the clipboard through the same
+// clean-up and the same gate. The pipeline cannot tell the two paths apart
+// downstream.
 //
 // Install (one-off, not saved to package.json, matching the other scripts here):
 //   npm i --no-save @anthropic-ai/sdk   # `plan` only - `import` needs nothing
@@ -31,11 +41,13 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import readline from 'node:readline/promises';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 import * as queueLib from './lib/queue.mjs';
 import * as pool from './lib/backgrounds.mjs';
+import * as clipboard from './lib/clipboard.mjs';
 // Safe to import at the top level: houserules.mjs has no dependencies, unlike
 // copy.mjs, which is loaded lazily inside `plan` so the SDK stays optional.
 import { systemFor, normalise, lint } from './lib/houserules.mjs';
@@ -128,29 +140,17 @@ async function plan() {
     effort: CONFIG.copy.effort,
   });
 
-  for (const draft of drafts) {
-    if (draft.items.length !== CONFIG.itemCount) {
-      console.log(
-        `  ! "${draft.hook}" came back with ${draft.items.length} items, expected ${CONFIG.itemCount} - queued anyway, fix it in review`
-      );
-    }
-    const post = {
-      id: queueLib.makeId(draft.hook, queue.posts),
-      status: 'draft',
-      createdAt: new Date().toISOString(),
-      hook: draft.hook,
-      items: draft.items,
-      cta: CONFIG.cta.text,
-      caption: draft.caption || CONFIG.caption.lead,
-    };
-    queue.posts.push(post);
-    console.log(`\n  ${post.id}`);
-    console.log(`    ${post.hook}`);
-    post.items.forEach((item, i) => console.log(`    ${i + 1}. ${item}`));
+  // Queued through exactly the same path as the free import, so the API path
+  // and the hand-carried one cannot drift - including the lint, which used to
+  // run on imported copy only. A house-rule breach is a house-rule breach
+  // whoever typed it.
+  const queued = queueDrafts(drafts);
+  for (const post of queued) {
+    console.log('');
+    showPost(post);
   }
 
-  queueLib.save(queue);
-  console.log(`\n${drafts.length} draft(s) queued. Review them, then:`);
+  console.log(`\n${queued.length} draft(s) queued. Review them, then:`);
   console.log('  node slideshow.mjs approve all');
 }
 
@@ -158,7 +158,7 @@ async function plan() {
 
 function list() {
   const queue = queueLib.load();
-  if (!queue.posts.length) return console.log('queue is empty - run `plan`');
+  if (!queue.posts.length) return console.log('queue is empty - run `go` (free) or `plan` (API key)');
   for (const state of queueLib.STATES) {
     const posts = queueLib.byState(queue, state);
     if (!posts.length) continue;
@@ -204,50 +204,83 @@ function approve() {
  * written by hand stops matching copy written by the API and the feed reads
  * like two different accounts.
  */
-function brief() {
-  const count = Number(flag('count', '3'));
-  const topic = flag('topic');
+function buildBrief({ count, topic }) {
   const queue = queueLib.load();
   const recentHooks = queue.posts.slice(-40).map((p) => p.hook);
 
-  console.log(systemFor(CONFIG.itemCount));
-  console.log(`\n---\n`);
-  console.log(
+  const parts = [systemFor(CONFIG.itemCount), '\n---\n'];
+
+  parts.push(
     `Draft ${count} distinct carousel${count === 1 ? '' : 's'}. ` +
       (topic ? `Theme: ${topic}. ` : '') +
-      `Vary the shape: a mistakes list, a habits list, a signs list and a ` +
-      `reasons list all read differently in the feed.`
+      `Vary the shape across the set - a mistakes list, a habits list, a signs ` +
+      `list and a reasons list all read differently in the feed.`
   );
 
   if (recentHooks.length) {
-    console.log(
-      `\nAlready posted or queued - do not repeat these angles, and do not write a near-synonym of one:`
+    parts.push(
+      `\nAlready posted or queued - do not repeat these angles, and do not write a near-synonym of one:\n` +
+        recentHooks.map((h) => `- ${h}`).join('\n')
     );
-    for (const hook of recentHooks) console.log(`- ${hook}`);
   }
 
-  console.log(
+  parts.push(
     `\nReply with nothing but a JSON array of ${count} object(s), each exactly:\n` +
       `  { "hook": "...", "items": [${Array.from({ length: CONFIG.itemCount }, () => '"..."').join(', ')}], "caption": "..." }\n` +
       `caption is two to four casual words for the post text, before the hashtags.`
   );
 
+  return parts.join('\n');
+}
+
+/**
+ * The free path, half one: hand over exactly what `plan` would have asked
+ * Claude, for pasting into a session you are already paying for.
+ *
+ * This is a straight lift of the `plan` request - same system prompt, same
+ * do-not-repeat list, same shape - because the moment the two drift, copy
+ * written by hand stops matching copy written by the API and the feed reads
+ * like two different accounts.
+ *
+ * It goes to the clipboard rather than only to stdout. Selecting ~120 lines out
+ * of a terminal without catching the shell prompt is the single most annoying
+ * step in the whole loop, and it is the step someone new hits first.
+ */
+function brief() {
+  const count = Number(flag('count', '3'));
+  const topic = flag('topic');
+  const text = buildBrief({ count, topic });
+
+  // --raw: the machine contract. Nothing but the prompt on stdout, so a script
+  // (or the /carousel slash command) can pipe it straight into an assistant.
+  if (has('raw')) {
+    process.stdout.write(text + '\n');
+    return;
+  }
+
+  console.log(text);
   console.log(`\n---\n`);
+
+  const copied = !has('no-copy') && clipboard.write(text);
+  if (copied) {
+    console.log('^ all of that is now on your CLIPBOARD.');
+    console.log('');
+    console.log('  1. paste it into any assistant - Claude, ChatGPT, Gemini, a free tier is fine');
+    console.log('  2. copy its whole reply');
+    console.log('  3. node slideshow.mjs import        (reads your clipboard)');
+    console.log('');
+    console.log('Or let one command walk you through all of it:  node slideshow.mjs go');
+    return;
+  }
+
   console.log('Paste everything above into any assistant you already use - Claude,');
   console.log('ChatGPT, Gemini, whichever. The brief carries all of its own context,');
   console.log('so nothing depends on which one, and a free tier is fine.');
   console.log('');
-  console.log('It replies with a JSON array. Nothing here ships a drafts.json and');
-  console.log('import will not invent one - CREATE that file yourself, here:');
-  console.log('');
-  console.log(`  ${path.join(REPO, 'drafts.json')}`);
-  console.log('');
-  console.log('Paste the array into it, save, then:');
-  console.log('  node slideshow.mjs import --from drafts.json');
-  console.log('');
-  console.log('The name is only a convention - --from takes any path, resolved');
-  console.log('against the repo root. To skip the file, pipe the reply in instead:');
-  console.log('  node slideshow.mjs import        (reads stdin)');
+  console.log('Then feed the reply back in any of these ways:');
+  console.log('  node slideshow.mjs import                      (clipboard)');
+  console.log('  node slideshow.mjs import --from drafts.json   (a file you create)');
+  console.log('  ... | node slideshow.mjs import                (stdin)');
 }
 
 /**
@@ -259,29 +292,91 @@ function brief() {
  * carried by hand. Skipping ahead here would quietly remove the one control
  * the whole pipeline is built around.
  */
-function importDrafts() {
+/**
+ * Where the reply is coming from. Order matters:
+ *
+ *   --from <file>   explicit, always wins
+ *   --paste         explicit clipboard
+ *   piped stdin     a script or a shell pipeline
+ *   clipboard       the interactive default, because it is what someone who
+ *                   just copied a reply out of a chat window actually wants
+ *
+ * The old default was a bare `readFileSync(0)`, which blocks forever on an
+ * interactive terminal with no pipe - the tool looked hung when it was waiting
+ * for a stdin that was never coming.
+ */
+function readDraftSource() {
   const from = flag('from');
-  const raw = from
-    ? fs.readFileSync(path.resolve(REPO, from), 'utf8')
-    : fs.readFileSync(0, 'utf8');
+  if (from) {
+    const resolved = path.resolve(REPO, from);
+    if (!fs.existsSync(resolved)) {
+      throw new Error(
+        `no such file: ${resolved}\n` +
+          `  Nothing ships a drafts.json - you create it, or skip the file entirely:\n` +
+          `    node slideshow.mjs import          (reads your clipboard)`
+      );
+    }
+    return { raw: fs.readFileSync(resolved, 'utf8'), source: path.relative(REPO, resolved) };
+  }
 
-  if (!raw.trim()) throw new Error('nothing to import - pass --from <file> or pipe JSON in');
+  if (!has('paste') && !process.stdin.isTTY) {
+    return { raw: fs.readFileSync(0, 'utf8'), source: 'stdin' };
+  }
 
-  let parsed;
+  const text = clipboard.read();
+  if (text === null) {
+    throw new Error(
+      'no clipboard available on this machine - pass --from <file> or pipe the JSON in'
+    );
+  }
+  return { raw: text, source: 'clipboard' };
+}
+
+function parseDrafts(raw, source = 'input') {
+  if (!raw.trim()) {
+    // Naming the source matters more than it looks. stdin wins over the
+    // clipboard whenever there is no TTY, so anything that wraps this tool -
+    // CI, a task runner, another agent - silently takes the stdin branch. An
+    // error that says "the clipboard is empty" while it is actually reading an
+    // empty pipe sends you looking in entirely the wrong place.
+    throw new Error(
+      `nothing to import - ${source} was empty.` +
+        (source === 'stdin'
+          ? '\n  Nothing was piped in. To read your clipboard instead:\n    node slideshow.mjs import --paste'
+          : '\n  Copy the assistant reply first, then run this again.')
+    );
+  }
   try {
-    parsed = JSON.parse(raw);
+    return JSON.parse(raw);
   } catch {
     // A pasted reply often arrives wrapped in prose or a ```json fence. Pull
     // the outermost array out rather than making someone hand-trim the file.
     const match = raw.match(/\[[\s\S]*\]/);
-    if (!match) throw new Error('could not find JSON in that input');
-    parsed = JSON.parse(match[0]);
+    if (!match) {
+      throw new Error(
+        'could not find JSON in that input.\n' +
+          '  Expected an array like [{ "hook": "...", "items": [...], "caption": "..." }]\n' +
+          `  Got instead: ${raw.trim().slice(0, 120)}${raw.trim().length > 120 ? '...' : ''}`
+      );
+    }
+    return JSON.parse(match[0]);
   }
+}
 
+/**
+ * Queue drafts from anywhere. Shared by `import` and `go`.
+ *
+ * Everything lands as `draft`, never `approved`. The point of the gate is that
+ * a human has read the copy in the queue, and pasting a model's reply into a
+ * file is not that - it is the same unreviewed output `plan` produces, just
+ * carried by hand. Skipping ahead here would quietly remove the one control
+ * the whole pipeline is built around.
+ */
+function queueDrafts(parsed) {
   const incoming = Array.isArray(parsed) ? parsed : parsed.posts || [parsed];
   const queue = queueLib.load();
   const seen = new Set(queue.posts.map((p) => p.hook.toLowerCase()));
-  let queued = 0;
+  const queued = [];
 
   for (const entry of incoming) {
     const draft = normalise(entry);
@@ -305,27 +400,39 @@ function importDrafts() {
     };
     queue.posts.push(post);
     seen.add(draft.hook.toLowerCase());
-    queued += 1;
-
-    console.log(`\n  ${post.id}`);
-    console.log(`    ${post.hook}`);
-    post.items.forEach((item, i) => console.log(`    ${i + 1}. ${item}`));
-    for (const warning of lint(post, CONFIG.itemCount)) console.log(`    ! ${warning}`);
+    queued.push(post);
   }
 
-  if (!queued) return console.log('\nnothing queued');
-  queueLib.save(queue);
-  console.log(`\n${queued} draft(s) queued. Review them, then:`);
+  if (queued.length) queueLib.save(queue);
+  return queued;
+}
+
+/** Print one post the way the review gate wants to read it. */
+function showPost(post, indent = '  ') {
+  console.log(`${indent}${post.id}`);
+  console.log(`${indent}  ${post.hook}`);
+  post.items.forEach((item, i) => console.log(`${indent}  ${i + 1}. ${item}`));
+  console.log(`${indent}  caption: ${post.caption}`);
+  for (const warning of lint(post, CONFIG.itemCount)) console.log(`${indent}  ! ${warning}`);
+}
+
+function importDrafts() {
+  const { raw, source } = readDraftSource();
+  const queued = queueDrafts(parseDrafts(raw, source));
+
+  if (!queued.length) return console.log('\nnothing queued');
+  console.log(`\nread from ${source}`);
+  for (const post of queued) {
+    console.log('');
+    showPost(post);
+  }
+  console.log(`\n${queued.length} draft(s) queued. Review them, then:`);
   console.log('  node slideshow.mjs approve all');
 }
 
 // ---------------------------------------------------------------- render
 
-function render() {
-  const queue = queueLib.load();
-  const post = queueLib.pick(queue, 'approved', positional[0]);
-  if (!post) return console.log('nothing approved - run `approve` first');
-
+function renderPost(queue, post) {
   const slideCount = 1 + post.items.length; // hook + items (the CTA takes the stadium)
   const players = pool.choose(CONFIG.backgrounds.player, slideCount, CONFIG.backgrounds.cooldownDays);
   const stadiums = pool.choose(CONFIG.backgrounds.stadium, 1, CONFIG.backgrounds.cooldownDays);
@@ -414,6 +521,18 @@ function render() {
   console.log(`  node slideshow.mjs publish ${post.id} --manual`);
 }
 
+function render() {
+  const queue = queueLib.load();
+  const target = positional[0];
+  const posts =
+    target === 'all'
+      ? queueLib.byState(queue, 'approved')
+      : [queueLib.pick(queue, 'approved', target)].filter(Boolean);
+
+  if (!posts.length) return console.log('nothing approved - run `approve` first');
+  for (const post of posts) renderPost(queue, post);
+}
+
 // ---------------------------------------------------------------- publish
 
 async function publish() {
@@ -489,6 +608,135 @@ async function publish() {
   console.log(`  posted ${post.id}  publish_id=${publishId}  status=${status.status}`);
 }
 
+// ---------------------------------------------------------------- go
+
+/** Blocking problems only - the things that make a render impossible. */
+function preflight() {
+  const problems = [];
+
+  if (!fs.existsSync(path.join(DIR, 'fonts', CONFIG.font))) {
+    problems.push(`font ${CONFIG.font} missing - run: node slideshow.mjs fonts`);
+  }
+  const python = spawnSync(process.platform === 'win32' ? 'python' : 'python3', ['-c', 'import PIL'], {
+    stdio: 'ignore',
+  });
+  if (python.status !== 0) problems.push('Pillow missing - run: pip install Pillow');
+
+  for (const key of ['player', 'stadium']) {
+    const category = CONFIG.backgrounds[key];
+    if (!pool.listPool(category).length) {
+      problems.push(`backgrounds/${category} is empty - drop wallpapers into ${path.relative(REPO, pool.poolDir(category))}`);
+    }
+  }
+  return problems;
+}
+
+/**
+ * The whole free loop in one command.
+ *
+ * This does NOT weaken the review gate. It walks the same state machine every
+ * other verb does and stops on each draft to print the copy and wait for a
+ * keystroke - the gate moves from "run a second command" to "press y", which
+ * is the same human reading the same words. What it removes is the four-verb
+ * ceremony and the drafts.json round trip, not the reading.
+ *
+ * Interactive only, on purpose. A non-TTY caller is refused rather than
+ * defaulted, so no cron or CI job can ever end up auto-approving by inheriting
+ * a pipe.
+ */
+async function go() {
+  if (!process.stdin.isTTY) {
+    throw new Error(
+      '`go` needs a real terminal - it is the interactive path and will not auto-approve.\n' +
+        '  In a script: node slideshow.mjs brief --raw   ->  import  ->  approve  ->  render'
+    );
+  }
+
+  const problems = preflight();
+  if (problems.length) {
+    console.log('Cannot render yet:\n');
+    for (const problem of problems) console.log(`  ! ${problem}`);
+    console.log('\nFull check: node slideshow.mjs doctor');
+    return;
+  }
+
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  const ask = async (question) => (await rl.question(question)).trim().toLowerCase();
+
+  try {
+    let queue = queueLib.load();
+    let drafts = queueLib.byState(queue, 'draft');
+
+    if (drafts.length) {
+      console.log(`${drafts.length} draft(s) already waiting - reviewing those.`);
+      console.log('(to draft more first, empty the queue or use `brief` + `import`)\n');
+    } else {
+      const count = Number(flag('count', '3'));
+      const topic = flag('topic');
+      const text = buildBrief({ count, topic });
+
+      if (clipboard.write(text)) {
+        console.log(`Brief for ${count} carousel(s) is on your CLIPBOARD.\n`);
+      } else {
+        console.log(text);
+        console.log('\n---\n(could not reach the clipboard, so the brief is printed above)\n');
+      }
+      console.log('  1. paste it into any assistant - Claude, ChatGPT, Gemini, a free tier is fine');
+      console.log('  2. copy its whole reply');
+      console.log('  3. come back here\n');
+
+      await rl.question('press Enter once the reply is copied...');
+
+      const raw = clipboard.read();
+      if (raw !== null && raw.trim() === text.trim()) {
+        throw new Error('the clipboard still holds the brief - copy the assistant REPLY, then run `go` again');
+      }
+      if (raw === null || !raw.trim()) {
+        throw new Error('clipboard is empty - copy the assistant reply, then run `go` again');
+      }
+
+      const queued = queueDrafts(parseDrafts(raw, 'clipboard'));
+      if (!queued.length) throw new Error('nothing new to queue - every hook in that reply is already in the queue');
+      console.log(`\n${queued.length} draft(s) queued.\n`);
+
+      queue = queueLib.load();
+      drafts = queueLib.byState(queue, 'draft');
+    }
+
+    console.log('Review. Nothing renders until you say so.\n');
+    const approved = [];
+    for (const post of drafts) {
+      console.log('');
+      showPost(post);
+      const answer = await ask('\n  approve?  [y]es   [Enter] skip   [q]uit: ');
+      if (answer === 'q') break;
+      if (answer !== 'y' && answer !== 'yes') {
+        console.log('  left as a draft');
+        continue;
+      }
+      post.status = 'approved';
+      post.approvedAt = new Date().toISOString();
+      approved.push(post);
+      console.log('  approved');
+    }
+    queueLib.save(queue);
+
+    if (!approved.length) {
+      console.log('\nNothing approved. The drafts are still in the queue - `go` again when you want them.');
+      return;
+    }
+
+    console.log(`\nRendering ${approved.length} post(s)...\n`);
+    for (const post of approved) renderPost(queue, post);
+
+    console.log('\nDone. Upload each out/<id>/ folder, then close the loop so the hooks');
+    console.log('join the do-not-repeat list:');
+    for (const post of approved) console.log(`  node slideshow.mjs publish ${post.id} --manual`);
+  } finally {
+    rl.close();
+  }
+}
+
 // ---------------------------------------------------------------- doctor
 
 function doctor() {
@@ -541,7 +789,7 @@ function doctor() {
 
 // ---------------------------------------------------------------- main
 
-const VERBS = { fonts, plan, brief, import: importDrafts, list, edit, approve, render, publish, doctor };
+const VERBS = { go, fonts, plan, brief, import: importDrafts, list, edit, approve, render, publish, doctor };
 
 if (!verb || !VERBS[verb]) {
   console.log(fs.readFileSync(fileURLToPath(import.meta.url), 'utf8').split('\n\n')[0]);

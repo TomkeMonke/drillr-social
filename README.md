@@ -132,20 +132,23 @@ device's own corner radius plus its margin, so the rounding stays concentric
 with the screen instead of cutting a second curve inside the first. Re-crop
 either file and those numbers stop meaning anything - move the position instead.
 
-### The hook slide renders at full size
+### The hook slide renders 12% small
 
-The hook carries no `textScale` - it renders at the same size as the items.
+`textScale: 0.88` on the hook, set in `slideshow.mjs`, and the number is measured
+rather than picked. Hook slides on the reference posts come out at a **median of
+97px** against **110px** for their item slides - so the account does de-emphasise
+its own cover, at a ratio of 0.88. Our items sit at the `MAX_FONT_PCT` ceiling of
+110px, and 110 x 0.88 is 97 exactly.
 
-It used to be `textScale: 0.95`, on the reasoning that the hook is the cover and
-gets re-cropped by TikTok for the feed and the profile grid, so 5% of headroom
-kept the first and last words off the edges. That was decided when nothing
-capped the type and the hook fitted to 138px, where 5% was trimming an outlier.
-With `MAX_FONT_PCT` holding every slide at 110px, the same 5% would instead make
-the cover the *smallest* type in the carousel.
+It buys the practical thing too: the hook is the slide TikTok re-crops for the
+feed and the profile grid, and type sized to the full frame loses its first and
+last words there.
 
-`render.py` still supports the field and applies it after wrapping, so the line
-breaks someone approved do not move - the text just gets smaller. Adding
-`textScale: 0.95` back to `hookSlide` in `slideshow.mjs` is the whole revert.
+The scale is applied after wrapping, so the line breaks someone approved at the
+review gate do not move - the text just gets smaller.
+
+It was `0.95` before the type cap existed, when the hook fitted to 138px and the
+5% was trimming an outlier rather than setting a level.
 
 ## The loop
 

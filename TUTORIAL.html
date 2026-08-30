@@ -682,10 +682,10 @@ backgrounds/stadiums/   <span class="c">&larr; 6+  &mdash; the app-mention slide
             <pre>node slideshow.mjs brief --count 3</pre>
           </div>
           <p>
-            Prints what Drillr is, the copy rules, real past posts as examples, and a
-            list of every hook already used so you do not repeat one. It also puts the
-            whole thing on your clipboard, so there is nothing to select out of the
-            terminal.
+            Prints what Drillr is, the copy rules, real past posts as examples, and
+            every hook used so far so the assistant can pick a fresh angle. It also
+            puts the whole thing on your clipboard, so there is nothing to select out
+            of the terminal.
           </p>
         </div>
       </li>
@@ -720,9 +720,10 @@ backgrounds/stadiums/   <span class="c">&larr; 6+  &mdash; the app-mention slide
           <p>
             With no arguments it reads your clipboard, which is where the reply already
             is. Prints each carousel as it queues it, and flags anything off - hype
-            words, invented statistics, a line long enough to render small, a set that
-            mixes the two item shapes, a hook already in the queue. Fix wording directly
-            in <code>state/queue.json</code>; the text fields are all free text.
+            words, invented statistics, a colon in an item, a line long enough to
+            render smaller than the rest of the set, five items all the same length.
+            Fix wording directly in <code>state/queue.json</code>; the text fields are
+            all free text.
           </p>
 
           <div class="note">
@@ -886,8 +887,15 @@ node slideshow.mjs approve all</pre>
       <summary>import skipped one of my carousels</summary>
       <div class="inner">
         <p>
-          Either it had no hook, or that hook is already in the queue. It prints which
-          and why. Duplicates get skipped rather than queued twice.
+          It had no hook. That is the only thing that gets dropped, and it prints which
+          one and why.
+        </p>
+        <p>
+          A repeated hook is <em>not</em> skipped. It queues, with a note that the hook
+          has been used before, because reusing a strong hook with a different set of
+          items is normal here. To go back to dropping duplicates, set
+          <code>copy.repeatHooks</code> to <code>false</code> in
+          <code>config.json</code>.
         </p>
       </div>
     </details>

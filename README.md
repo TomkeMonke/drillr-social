@@ -297,18 +297,28 @@ Set it to `false` to restore the original behaviour exactly: the prompt forbids
 repeating an angle or writing a near-synonym, and `import` silently skips any
 draft whose hook is already in the queue. One value, nothing else to edit.
 
-### Length is a rendering decision
+### Length is free until it isn't
 
-The renderer auto-fits every line, so character count decides type size and
-nothing else. Measured on the real template with Archivo Black at 1080x1920:
+Since `MAX_FONT_PCT` landed, item length is a **rhythm** decision rather than a
+size one. Everything up to about 52 characters renders at the identical 110px,
+because the cap binds long before the box does:
 
-    40 chars -> 143px      60 chars -> 102px      80 chars -> ~71px
+    22 chars -> 110px     43 -> 110px     52 -> 110px
+    58 chars -> 103px     63 ->  92px     70 ->  81px
 
-An item at 40 characters renders about **70% larger** than the same item at 70,
-and roughly double one at 80. That is why `lint` reports length as "renders
-roughly half the size of a 40-char line" rather than as a character cap - the cap
-is not the point, the type size is. It is also the main argument against the
-retired colon shape: the consequence half is bought entirely out of type size.
+Reference items top out at 51 characters, so in practice every item on a real
+post renders at the same size. That is worth knowing because it means varying
+the copy length costs nothing - and it is why the prompt now *requires* variation.
+
+Before the cap this section said the opposite: shorter copy rendered bigger, so
+every item wanted to be short. That was true then and it is not true now, and
+leaving it in the prompt was what flattened the drafts - real posts hold a spread
+of about **14 characters** inside one carousel, ours were coming out at 5-7.
+`lint` warns on any set with a spread under 10.
+
+Past 55 characters the type does start shrinking below the rest of the set,
+which is the main argument against the retired colon shape: its consequence half
+is bought entirely out of type size.
 
 ## Turning on auto-post
 

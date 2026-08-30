@@ -1,1 +1,8 @@
 Pillow>=10
+
+# Only the measurement commands need this - `render.py --calibrate <dir>` and
+# the type-size measurement behind MAX_FONT_PCT. Rendering a carousel does not.
+# It is declared anyway because --calibrate is documented in the README, and
+# without numpy that command dies on ModuleNotFoundError rather than telling
+# you what is missing.
+numpy>=1.24

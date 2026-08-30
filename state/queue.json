@@ -14,8 +14,8 @@
       ],
       "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
       "caption": "no excuses",
-      "approvedAt": "2026-08-29T22:48:01.739Z",
-      "renderedAt": "2026-08-29T22:48:10.164Z",
+      "approvedAt": "2026-08-30T01:02:30.281Z",
+      "renderedAt": "2026-08-30T01:02:39.097Z",
       "outDir": "out\\2026-08-29-5-habits-that-will-end-your",
       "caption_full": "no excuses #football #footballapp #footballskills #soccer #footballtiktok",
       "backgrounds": [
@@ -42,8 +42,8 @@
       ],
       "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
       "caption": "be honest",
-      "approvedAt": "2026-08-29T23:05:12.016Z",
-      "renderedAt": "2026-08-29T23:06:17.957Z",
+      "approvedAt": "2026-08-30T01:02:30.281Z",
+      "renderedAt": "2026-08-30T01:02:46.785Z",
       "outDir": "out\\2026-08-29-5-mistakes-wrecking-your-football-career",
       "caption_full": "be honest #football #footballapp #footballskills #soccer #footballtiktok",
       "backgrounds": [
@@ -70,10 +70,178 @@
       ],
       "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
       "caption": "which one are you",
-      "approvedAt": "2026-08-29T22:48:04.736Z",
-      "renderedAt": "2026-08-29T22:48:20.592Z",
+      "approvedAt": "2026-08-30T01:02:30.281Z",
+      "renderedAt": "2026-08-30T01:02:56.463Z",
       "outDir": "out\\2026-08-29-5-signs-you-ll-go-pro",
       "caption_full": "which one are you #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png"
+      ]
+    },
+    {
+      "id": "2026-08-30-5-mistakes-that-will-end-your",
+      "status": "rendered",
+      "createdAt": "2026-08-30T00:47:37.465Z",
+      "hook": "5 mistakes that will end your career early",
+      "items": [
+        "You skip warming up before training",
+        "You blame the ref instead of yourself",
+        "You quit when things get difficult",
+        "You copy others instead of your own game",
+        "You've accepted being average"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "fix it now",
+      "approvedAt": "2026-08-30T01:02:30.281Z",
+      "renderedAt": "2026-08-30T01:03:03.889Z",
+      "outDir": "out\\2026-08-30-5-mistakes-that-will-end-your",
+      "caption_full": "fix it now #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png"
+      ]
+    },
+    {
+      "id": "2026-08-30-5-signs-you-re-built-to",
+      "status": "rendered",
+      "createdAt": "2026-08-30T00:47:37.465Z",
+      "hook": "5 signs you're built to go pro",
+      "items": [
+        "You train alone when no one is watching",
+        "You ask for feedback instead of avoiding it",
+        "You recover properly instead of rushing back",
+        "You study the players in your position",
+        "You stay ready even when you're not selected"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "be honest",
+      "approvedAt": "2026-08-30T01:02:30.281Z",
+      "renderedAt": "2026-08-30T01:03:11.759Z",
+      "outDir": "out\\2026-08-30-5-signs-you-re-built-to",
+      "caption_full": "be honest #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png"
+      ]
+    },
+    {
+      "id": "2026-08-30-5-reasons-your-football-career-goes",
+      "status": "rendered",
+      "createdAt": "2026-08-30T00:47:37.465Z",
+      "hook": "5 reasons your football career goes nowhere",
+      "items": [
+        "You train the same way every single week",
+        "You ignore feedback from your coach",
+        "You skip recovery to train more",
+        "You compare your progress to everyone else",
+        "You stop believing you can make it"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "wake up",
+      "approvedAt": "2026-08-30T01:02:30.281Z",
+      "renderedAt": "2026-08-30T01:03:23.206Z",
+      "outDir": "out\\2026-08-30-5-reasons-your-football-career-goes",
+      "caption_full": "wake up #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png"
+      ]
+    },
+    {
+      "id": "2026-08-30-5-things-holding-your-football-career",
+      "status": "rendered",
+      "createdAt": "2026-08-30T00:59:02.175Z",
+      "hook": "5 things holding your football career back",
+      "items": [
+        "You only show up when the coach is watching",
+        "You skip the boring reps",
+        "You make excuses before you even try",
+        "You avoid the position battles",
+        "You quit on yourself before the final whistle"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "be honest",
+      "approvedAt": "2026-08-30T01:02:30.281Z",
+      "renderedAt": "2026-08-30T01:03:35.377Z",
+      "outDir": "out\\2026-08-30-5-things-holding-your-football-career",
+      "caption_full": "be honest #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png"
+      ]
+    },
+    {
+      "id": "2026-08-30-5-signs-coaches-already-rate-you",
+      "status": "rendered",
+      "createdAt": "2026-08-30T00:59:02.175Z",
+      "hook": "5 signs coaches already rate you",
+      "items": [
+        "You ask for extra reps after training",
+        "You know your role without being told",
+        "You recover faster than you used to",
+        "You watch your own mistakes back",
+        "You never let a bad game carry over"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "sound familiar",
+      "approvedAt": "2026-08-30T01:02:30.281Z",
+      "renderedAt": "2026-08-30T01:03:44.268Z",
+      "outDir": "out\\2026-08-30-5-signs-coaches-already-rate-you",
+      "caption_full": "sound familiar #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png",
+        "photo-1566895291281-ea63efd4bdbc.png"
+      ]
+    },
+    {
+      "id": "2026-08-30-5-reasons-scouts-overlook-talented-players",
+      "status": "rendered",
+      "createdAt": "2026-08-30T00:59:02.175Z",
+      "hook": "5 reasons scouts overlook talented players",
+      "items": [
+        "You look tired in every session",
+        "You sulk when you get subbed off",
+        "You only play well when you're winning",
+        "You ignore the coach's feedback",
+        "You freeze up in big games"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "fix it",
+      "approvedAt": "2026-08-30T01:02:30.281Z",
+      "renderedAt": "2026-08-30T01:03:53.914Z",
+      "outDir": "out\\2026-08-30-5-reasons-scouts-overlook-talented-players",
+      "caption_full": "fix it #football #footballapp #footballskills #soccer #footballtiktok",
       "backgrounds": [
         "photo-1566895291281-ea63efd4bdbc.png",
         "photo-1566895291281-ea63efd4bdbc.png",

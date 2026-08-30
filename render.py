@@ -76,7 +76,23 @@ STROKE_RATIO = 0.081      # BLACK outline width as a multiple of font size
 EMBOLDEN_RATIO = 0.0      # faux-bold before the outline; see the docstring
 MAX_LINES = 4             # past 4 lines the slide stops being skimmable
 MIN_FONT = 28
-MAX_FONT = 200
+
+# Type size is CAPPED, not merely maximised, and the cap is measured.
+#
+# --calibrate only ever reports ratios normalised to stem width, and those are
+# scale-invariant by design, so nothing here had ever measured how big the type
+# actually is. The fitter simply took the largest size that fit the box, which
+# meant a short item ballooned: "1. You skip recovery days" rendered at 200px,
+# nearly double anything the account has posted.
+#
+# Measured across the 24 legible non-promo reference slides, type lands at
+# 0.065-0.111 of canvas width. Restricted to the item slides whose text is
+# known, the median is 0.102 - so that is the ceiling. Longer copy still shrinks
+# below it exactly as before; the cap only stops short copy running away.
+#
+# A fraction of width rather than a pixel count, to match TEXT_WIDTH_PCT and
+# LAYOUT_HEIGHT_PCT and so the template survives a canvas change.
+MAX_FONT_PCT = 0.102      # ~110px on a 1080-wide canvas
 
 # Vertical placement of the text block's CENTRE, per layout. `center` sits just
 # above the true middle because the eye reads a centred block as low when the
@@ -160,10 +176,17 @@ def draw_stroked_line(draw, xy, text, font, fill, stroke_fill, size):
         draw.text(xy, text, font=font, fill=fill, anchor="mm")
 
 
-def fit_text(draw, text, font_name, box_w, box_h, max_lines=MAX_LINES):
-    """Largest font size whose wrapped text fits the box and the line budget."""
+def fit_text(draw, text, font_name, box_w, box_h, max_lines=MAX_LINES, max_font=None):
+    """Largest font size whose wrapped text fits the box, budget and size cap.
+
+    `max_font` is the measured ceiling (see MAX_FONT_PCT). It is a real
+    constraint rather than a safety rail: most item slides now hit it, because
+    short copy would otherwise fit the box at a size the account never uses.
+    """
+    if max_font is None:
+        max_font = round(CANVAS[0] * MAX_FONT_PCT)
     best = None
-    lo, hi = MIN_FONT, MAX_FONT
+    lo, hi = MIN_FONT, max(MIN_FONT, max_font)
     while lo <= hi:
         mid = (lo + hi) // 2
         font = load_font(font_name, mid)
@@ -271,7 +294,10 @@ def draw_slide(slide, spec):
         box_w = round(width * TEXT_WIDTH_PCT)
         box_h = round(height * LAYOUT_HEIGHT_PCT.get(layout, 0.46))
         max_lines = int(slide.get("maxLines", MAX_LINES))
-        size, lines, font = fit_text(draw, text, font_name, box_w, box_h, max_lines)
+        # Derived from the actual canvas, not the constant, so a spec that
+        # renders at another size keeps the same proportions.
+        max_font = round(width * MAX_FONT_PCT)
+        size, lines, font = fit_text(draw, text, font_name, box_w, box_h, max_lines, max_font)
 
         # textScale trims the fitted size without re-wrapping, so the line
         # breaks a human approved do not move. Used on the hook slide, which is

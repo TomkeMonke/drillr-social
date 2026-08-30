@@ -86,6 +86,27 @@ Against the 32 reference slides the ratios are `outline/stem 0.429` and
 those into `STROKE_RATIO` and `LINE_SPACING` at the top of `render.py`. Current
 output measures within 1.5% of both.
 
+### The type size itself is capped
+
+Every ratio `--calibrate` reports is normalised to stem width, which makes them
+scale-invariant - so for a long time nothing measured how *big* the type is.
+`fit_text` just took the largest size that fit the box, and short copy ran away
+with it: `1. You skip recovery days` rendered at 200px, nearly double anything
+the account has posted.
+
+Measured across the 24 legible non-promo reference slides, using line advance
+normalised by canvas width, type lands at **0.065-0.111 of width**. Restricted to
+the item slides whose text is known, the median is **0.102**. That is
+`MAX_FONT_PCT`, about 110px on a 1080 canvas. Ours now renders those same items
+at 110px against a reference range of 103-131.
+
+Longer copy still shrinks below the cap exactly as before - the ceiling only
+stops short copy from ballooning. The app-mention slide is unaffected, since its
+copy is long enough to land at 78px on its own either way.
+
+Re-measure with the script pattern in `render.py`'s `_text_bands`, or just trust
+the constant and change it if the look moves.
+
 One thing does not match and cannot: Archivo Black's stems are about 7% heavier
 than the reference face relative to line height. That is the font, not the
 settings - which is also why `EMBOLDEN_RATIO` is 0 rather than adding faux-bold
@@ -111,12 +132,20 @@ device's own corner radius plus its margin, so the rounding stays concentric
 with the screen instead of cutting a second curve inside the first. Re-crop
 either file and those numbers stop meaning anything - move the position instead.
 
-### The hook slide renders 5% small
+### The hook slide renders at full size
 
-`textScale: 0.95` on the hook, set in `slideshow.mjs`. The hook is the cover, so
-TikTok re-crops it for the feed and the profile grid, and type sized to the full
-frame loses its first and last words. The scale is applied after wrapping, so
-the line breaks someone approved do not move - the text just gets smaller.
+The hook carries no `textScale` - it renders at the same size as the items.
+
+It used to be `textScale: 0.95`, on the reasoning that the hook is the cover and
+gets re-cropped by TikTok for the feed and the profile grid, so 5% of headroom
+kept the first and last words off the edges. That was decided when nothing
+capped the type and the hook fitted to 138px, where 5% was trimming an outlier.
+With `MAX_FONT_PCT` holding every slide at 110px, the same 5% would instead make
+the cover the *smallest* type in the carousel.
+
+`render.py` still supports the field and applies it after wrapping, so the line
+breaks someone approved do not move - the text just gets smaller. Adding
+`textScale: 0.95` back to `hookSlide` in `slideshow.mjs` is the whole revert.
 
 ## The loop
 

@@ -455,15 +455,21 @@ function renderPost(queue, post) {
   // No tighter line cap on the hook than on the items. Capping it at 3 lines
   // makes the autofit shrink it BELOW the item slides, which inverts the
   // hierarchy - the one slide that has to stop a thumb ends up the smallest.
-  // textScale: the hook is the slide TikTok is most likely to crop into - it is
-  // the cover, so it gets shown at other aspect ratios in the feed and on a
-  // profile grid. 5% of headroom costs nothing and stops the first and last
-  // words losing their edges.
+  //
+  // The hook carries NO textScale: it renders at the same size as the items.
+  // It used to be 0.95, on the reasoning that the hook is the cover and gets
+  // re-cropped by TikTok for the feed and the profile grid, so 5% of headroom
+  // kept the first and last words off the edges. That was decided when nothing
+  // capped the type and the hook fitted to 138px - trimming an outlier. Now
+  // MAX_FONT_PCT holds every slide at 110px, so the same 5% would make the
+  // cover the smallest type in the carousel rather than the safest.
+  // (tomek, 2026-08-30. To restore: add `textScale: 0.95` back here - render.py
+  // still supports the field and applies it after wrapping, so approved line
+  // breaks do not move.)
   const hookSlide = {
     text: post.hook,
     background: players.files[0],
     layout: 'center',
-    textScale: 0.95,
   };
 
   const itemSlides = post.items.map((item, i) => ({

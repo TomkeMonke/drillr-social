@@ -49,7 +49,7 @@ import { fileURLToPath } from 'node:url';
 import * as queueLib from './lib/queue.mjs';
 import * as pool from './lib/backgrounds.mjs';
 import * as clipboard from './lib/clipboard.mjs';
-import * as memory from './lib/memory.mjs';
+import * as duplicates from './lib/duplicates.mjs';
 // Safe to import at the top level: houserules.mjs has no dependencies, unlike
 // copy.mjs, which is loaded lazily inside `plan` so the SDK stays optional.
 import { systemFor, buildAsk, normalise, lint } from './lib/houserules.mjs';
@@ -100,19 +100,16 @@ const VALUED = new Set(['count', 'topic', 'from']);
 const repeatHooksEnabled = () => CONFIG.copy?.repeatHooks !== false;
 
 /**
- * What the account has already said, compressed for the prompt.
+ * The hooks the prompt feeds back.
  *
- * Both drafting paths go through here for the same reason they share buildAsk:
- * they used to compute their own history slice, and the moment those drift,
- * copy drafted through the API stops matching copy carried by hand.
- *
- * Drawing the angles marks them offered, so two briefs in a row get different
- * ones. See lib/memory.mjs for why that is a rotation and not a budget.
+ * Both drafting paths call this rather than slicing the queue themselves: the
+ * moment the two computations drift, copy drafted through the API stops
+ * matching copy carried by hand, which is the drift houserules.mjs exists to
+ * stop. Everything we have ever written, not just what is pending - a hook
+ * that went out in June is exactly the one the model wants to write in August.
  */
-function recallMemory({ count, topic }) {
-  const past = memory.recall({ count, topic, settings: CONFIG.copy?.memory ?? {} });
-  memory.markAnglesOffered(past.angles);
-  return past;
+function recentHooks() {
+  return queueLib.load().posts.slice(-40).map((p) => p.hook);
 }
 const positional = [];
 for (let i = 1; i < args.length; i += 1) {
@@ -169,24 +166,14 @@ async function plan() {
   const count = parseCount(flag('count'));
   const topic = flag('topic');
 
-  // What the model is told about the past. By default that is the flat list of
-  // previous hooks and nothing else - config.copy.memory.enabled swaps in the
-  // compressed version, and is off for the reason recorded above buildAsk.
-  const past = recallMemory({ count, topic });
-
   const { draftPosts } = await import('./lib/copy.mjs');
   console.log(`Drafting ${count} carousel(s) with ${CONFIG.copy.model}...`);
-  for (const angle of past.angles) console.log(`  angle: ${angle}`);
   const drafts = await draftPosts({
     count,
     itemCount: CONFIG.itemCount,
     topic,
-    recentHooks: past.hooks,
+    recentHooks: recentHooks(),
     repeatHooks: repeatHooksEnabled(),
-    memory: past.enabled,
-    angles: past.angles,
-    worn: past.worn,
-    captions: past.captions,
     model: CONFIG.copy.model,
     effort: CONFIG.copy.effort,
   });
@@ -256,21 +243,10 @@ function approve() {
  * like two different accounts.
  */
 function buildBrief({ count, topic }) {
-  const past = recallMemory({ count, topic });
-
-  const parts = [systemFor(CONFIG.itemCount, { memory: past.enabled }), '\n---\n'];
+  const parts = [systemFor(CONFIG.itemCount), '\n---\n'];
 
   parts.push(
-    buildAsk({
-      count,
-      topic,
-      recentHooks: past.hooks,
-      repeatHooks: repeatHooksEnabled(),
-      memory: past.enabled,
-      angles: past.angles,
-      worn: past.worn,
-      captions: past.captions,
-    })
+    buildAsk({ count, topic, recentHooks: recentHooks(), repeatHooks: repeatHooksEnabled() })
   );
 
   parts.push(
@@ -466,7 +442,7 @@ function queueDrafts(parsed) {
 /**
  * Items this post has effectively written before.
  *
- * The free half of the memory. `lint` can only see the post in front of it,
+ * The free half of the check. `lint` can only see the post in front of it,
  * and the prompt can only be told a dozen worn words before it stops being
  * pasteable - but this runs locally against every item the account has ever
  * written, at no cost to either. It is where the deep history actually lives.
@@ -476,11 +452,11 @@ function queueDrafts(parsed) {
  */
 function repeatWarnings(post) {
   const queue = queueLib.load();
-  const history = memory.allItems(queue.posts.filter((p) => p.id !== post.id));
+  const history = duplicates.allItems(queue.posts.filter((p) => p.id !== post.id));
   const warnings = [];
 
   for (const [i, item] of post.items.entries()) {
-    const match = memory.similar(item, history);
+    const match = duplicates.similar(item, history);
     if (match) {
       warnings.push(`item ${i + 1} is close to one already posted: "${match.item}"`);
     }
@@ -883,16 +859,6 @@ function doctor() {
 
   for (const overlay of CONFIG.cta.overlays ?? []) {
     ok(`CTA overlay ${overlay.path}`, fs.existsSync(path.resolve(REPO, overlay.path)));
-  }
-
-  // Not a failure either: an empty pool costs the brief its steering, not its
-  // ability to run. But a pool that has gone all the way round is worth seeing
-  // before the copy starts repeating, which is the whole reason it exists.
-  const angles = memory.angleStats();
-  if (!angles.total) {
-    console.log('  --   no angle pool - add lines to references/angles.json to steer the copy');
-  } else {
-    console.log(`  ok   angles: ${angles.total} in the pool, ${angles.fresh} never offered`);
   }
 
   console.log(`\n  auto-post: ${CONFIG.tiktok.enabled ? 'ENABLED' : 'off (config.tiktok.enabled=false)'}`);

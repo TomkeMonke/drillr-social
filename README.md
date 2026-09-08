@@ -341,41 +341,44 @@ same three examples, same ask - and that prompt names the same seven topics
 four times over, including a "do NOT reuse their topics: sleep, junk food..."
 line that primes them while forbidding them.
 
-#### The fix that was built, and what it cost
+#### The fix that was tried, and why it is gone
 
-`lib/memory.mjs` and `references/angles.json` attack all three: a drawn angle
-per carousel, a computed worn-word list, hooks with use counts, plus an
-import-time duplicate check. It is wired up, it works, and it is **off** -
-`config.copy.memory.enabled` is `false`.
-
-It was tried on 25 real carousels on 2026-09-08 and turned off again, because
-it bought variety *between* carousels by spending the variety *inside* them:
+A system that attacked all three was built and then removed the same week
+(`78d31ba` adds it, `edfb2d2` switches it off, `HEAD` deletes it). It drew a
+subject per carousel from a 50-entry pool, computed a worn-word list from every
+past item, and fed hooks back with use counts. It did reduce the repetition. It
+also made the copy worse, over 25 real carousels:
 
     1. Avoiding it in every drill
     2. Passing around it instead of through it
     3. Never practising it outside training
     4. Relying on your strong foot every time
 
-The angle was "how much you use your weak foot". It lived in the prompt and
-never reached a slide, so nothing on slides 1-3 says what "it" is. Slide 1 is
-the one that has to stop a thumb, and it meant nothing. Same failure in
-"Treating them as a threat", where "them" is a new player in your position.
+The subject was "how much you use your weak foot". It lived in the prompt and
+never reached a slide, so nothing on slides 1-3 says what "it" is - and slide 1
+is the one that has to stop a thumb. Same hole in "Treating them as a threat",
+where "them" is a new player in your position.
 
-And pinning one angle per carousel made all five items paraphrase it - five
-ways of saying "you switch off on the bench" - where the real posts put sleep,
-junk food, motivation, stretching and comparison in a single carousel. Five
-different habits, not one habit five times.
+The quieter fault is worse. Pinning a carousel to one subject makes all five
+items paraphrase it - five ways of saying "you switch off on the bench" - where
+the real posts put sleep, junk food, motivation, stretching and comparison in a
+single carousel. **Five different habits, not one habit five times.** It bought
+variety between carousels by spending the variety inside them, and inside is
+where a reader notices.
 
-Turn it back on only with a fix for both: an angle that names its own subject
-on every slide, or one angle per *batch* rather than per carousel.
+If it is ever worth rebuilding, the code is at `78d31ba` and it needs a fix for
+both: a subject that names itself on every slide, or one subject per *batch*
+rather than per carousel.
 
 #### What stayed on
 
 The parts that never touched the prompt, and cost nothing:
 
-- **the duplicate check at the gate** - `import` compares every incoming item
-  against every item ever posted and prints `= item 3 is close to one already
-  posted: "..."`. Warning, never rejection, the same way `lint` works.
+- **the duplicate check at the gate** (`lib/duplicates.mjs`) - `import`
+  compares every incoming item against every item ever posted and prints
+  `= item 3 is close to one already posted: "..."`. Warning, never rejection,
+  the same way `lint` works. This half never went near the prompt, which is
+  exactly why it survived.
 - **`plan` streams and scales `max_tokens`** with the count. It was pinned at
   16000, which on a big batch silently returned fewer carousels than asked for.
 
@@ -472,9 +475,8 @@ leaving a dead token in place.
     render.py         Pillow renderer; the whole look lives here
     config.json       template tuning, CTA text, hashtags, TikTok settings
     references/examples.json  20 slides of real posts - the few-shot corpus
-    references/angles.json    the angle pool - what each carousel is ABOUT
     lib/houserules.mjs    the system prompt, the clean-up and the lint
-    lib/memory.mjs    the back catalogue, compressed small enough to fit a prompt
+    lib/duplicates.mjs    "have we written this line before?" - runs at the gate
     lib/copy.mjs      Claude drafting over the API (the only paid path)
     lib/clipboard.mjs cross-platform clipboard I/O for the free path
     lib/queue.mjs     the draft->approved->rendered->posted state machine
@@ -482,7 +484,6 @@ leaving a dead token in place.
     lib/tiktok.mjs    Content Posting API
     .claude/commands/carousel.md   the /carousel slash command
     backgrounds/      wallpapers you supply (gitignored)
-    state/            queue.json, backgrounds-used.json, angles-used.json
-                      (committed - this is the memory)
+    state/            queue.json + backgrounds-used.json (committed - this is the memory)
     out/              rendered slides (gitignored)
 

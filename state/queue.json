@@ -1,3 +1,984 @@
 {
-  "posts": []
+  "posts": [
+    {
+      "id": "2026-09-08-5-things-that-will-kill-your",
+      "status": "rendered",
+      "createdAt": "2026-09-08T14:46:08.519Z",
+      "hook": "5 things that will kill your football career",
+      "items": [
+        "You skip your recovery",
+        "Straight back to junk food",
+        "Ignoring how sore your body actually is",
+        "Sleeping in instead of moving your legs",
+        "You never watch the game back to learn from it"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "recover right",
+      "approvedAt": "2026-09-08T14:46:25.798Z",
+      "renderedAt": "2026-09-08T14:46:38.516Z",
+      "outDir": "out\\2026-09-08-5-things-that-will-kill-your",
+      "caption_full": "recover right #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dasdd.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-5-signs-that-you-will-go",
+      "status": "rendered",
+      "createdAt": "2026-09-08T14:46:08.519Z",
+      "hook": "5 signs that you will go pro in football",
+      "items": [
+        "Extra reps done alone",
+        "Nobody has to tell you to warm up",
+        "You train the same on a Sunday as a Monday",
+        "You put in the work with no one watching",
+        "You still show up when skipping would go unnoticed"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "nobody's watching",
+      "approvedAt": "2026-09-08T14:46:26.288Z",
+      "renderedAt": "2026-09-08T14:46:40.629Z",
+      "outDir": "out\\2026-09-08-5-signs-that-you-will-go",
+      "caption_full": "nobody's watching #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dsad.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-5-reasons-you-will-never-go",
+      "status": "rendered",
+      "createdAt": "2026-09-08T14:46:08.519Z",
+      "hook": "5 reasons you will never go pro in football",
+      "items": [
+        "Sulking instead of watching",
+        "You stop paying attention once you're subbed",
+        "Talking instead of learning from the pitch",
+        "You switch off the second you sit down",
+        "You never study what the coach sees from there"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "watch and learn",
+      "approvedAt": "2026-09-08T14:46:26.870Z",
+      "renderedAt": "2026-09-08T14:46:42.665Z",
+      "outDir": "out\\2026-09-08-5-reasons-you-will-never-go",
+      "caption_full": "watch and learn #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dasdd.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-small-habits-that-are-holding-you",
+      "status": "rendered",
+      "createdAt": "2026-09-08T14:46:08.519Z",
+      "hook": "Small habits that are holding you back from improving",
+      "items": [
+        "Getting defensive straight away",
+        "Nodding along but changing nothing",
+        "You take it personally instead of using it",
+        "Arguing back before you've even listened",
+        "You stop trying the thing they just corrected"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "take the note",
+      "approvedAt": "2026-09-08T14:59:54.085Z",
+      "renderedAt": "2026-09-08T14:59:56.087Z",
+      "outDir": "out\\2026-09-08-small-habits-that-are-holding-you",
+      "caption_full": "take the note #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dasdd.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-5-things-that-will-kill-your-2",
+      "status": "rendered",
+      "createdAt": "2026-09-08T14:46:08.519Z",
+      "hook": "5 things that will kill your football career",
+      "items": [
+        "Skipping sessions when it rains",
+        "Making excuses about the cold",
+        "You train half as hard in the wind",
+        "Staying in when the pitch gets muddy",
+        "You use bad weather as your excuse to coast"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "weather's not the excuse",
+      "approvedAt": "2026-09-08T14:46:30.566Z",
+      "renderedAt": "2026-09-08T14:46:44.737Z",
+      "outDir": "out\\2026-09-08-5-things-that-will-kill-your-2",
+      "caption_full": "weather's not the excuse #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dsad.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-small-habits-that-are-holding-you-2",
+      "status": "rendered",
+      "createdAt": "2026-09-08T14:46:08.519Z",
+      "hook": "Small habits that are holding you back from improving",
+      "items": [
+        "Easing off before it's over",
+        "Coasting once the drills are done",
+        "You stop sprinting when no one's counting",
+        "Saving your energy instead of finishing strong",
+        "You let the last ten minutes go to waste"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "finish it properly",
+      "approvedAt": "2026-09-08T14:46:30.975Z",
+      "renderedAt": "2026-09-08T14:46:46.755Z",
+      "outDir": "out\\2026-09-08-small-habits-that-are-holding-you-2",
+      "caption_full": "finish it properly #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dasdd.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-5-signs-that-you-will-go-2",
+      "status": "rendered",
+      "createdAt": "2026-09-08T14:46:08.519Z",
+      "hook": "5 signs that you will go pro in football",
+      "items": [
+        "Never skipping it, even for five minutes",
+        "Matching the warm up to what you need that day",
+        "Stretching what's actually tight",
+        "Nobody has to remind you to start",
+        "Treating it as training, not a formality"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "warm up right",
+      "approvedAt": "2026-09-08T14:46:31.395Z",
+      "renderedAt": "2026-09-08T14:46:48.825Z",
+      "outDir": "out\\2026-09-08-5-signs-that-you-will-go-2",
+      "caption_full": "warm up right #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dsad.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-5-reasons-you-will-never-go-2",
+      "status": "rendered",
+      "createdAt": "2026-09-08T14:46:08.519Z",
+      "hook": "5 reasons you will never go pro in football",
+      "items": [
+        "No ball for six weeks straight",
+        "Eating whatever, whenever, all summer",
+        "Coming back slower than you left",
+        "Doing nothing and calling it rest",
+        "Showing up to pre-season already behind"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "summer's not off",
+      "approvedAt": "2026-09-08T14:46:31.801Z",
+      "renderedAt": "2026-09-08T14:46:50.875Z",
+      "outDir": "out\\2026-09-08-5-reasons-you-will-never-go-2",
+      "caption_full": "summer's not off #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dasdd.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-5-signs-that-you-will-go-3",
+      "status": "rendered",
+      "createdAt": "2026-09-08T14:46:08.519Z",
+      "hook": "5 signs that you will go pro in football",
+      "items": [
+        "Showing up already fit",
+        "Taking the running seriously",
+        "Treating it as the season, not before it",
+        "Nobody has to chase you to train",
+        "Arriving better than you left in May"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "arrive ready",
+      "approvedAt": "2026-09-08T14:46:32.290Z",
+      "renderedAt": "2026-09-08T14:46:53.253Z",
+      "outDir": "out\\2026-09-08-5-signs-that-you-will-go-3",
+      "caption_full": "arrive ready #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dsad.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-5-things-that-will-kill-your-3",
+      "status": "rendered",
+      "createdAt": "2026-09-08T14:46:08.520Z",
+      "hook": "5 things that will kill your football career",
+      "items": [
+        "Blaming the ref for your mistakes",
+        "Sulking instead of reviewing it",
+        "Avoiding the coach after the whistle",
+        "Letting one bad game ruin your week",
+        "Losing belief in yourself over ninety minutes"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "shake it off",
+      "approvedAt": "2026-09-08T14:46:32.682Z",
+      "renderedAt": "2026-09-08T14:46:56.059Z",
+      "outDir": "out\\2026-09-08-5-things-that-will-kill-your-3",
+      "caption_full": "shake it off #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dasdd.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-5-reasons-you-will-never-go-3",
+      "status": "rendered",
+      "createdAt": "2026-09-08T14:46:08.520Z",
+      "hook": "5 reasons you will never go pro in football",
+      "items": [
+        "Storming off without a handshake",
+        "Switching off completely on the bench",
+        "Sulking for the rest of the game",
+        "Blaming the manager instead of yourself",
+        "Letting it wreck your head for the next game"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "handle it better",
+      "approvedAt": "2026-09-08T14:46:33.006Z",
+      "renderedAt": "2026-09-08T14:46:58.665Z",
+      "outDir": "out\\2026-09-08-5-reasons-you-will-never-go-3",
+      "caption_full": "handle it better #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dsad.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-5-signs-that-you-will-go-4",
+      "status": "rendered",
+      "createdAt": "2026-09-08T14:46:08.520Z",
+      "hook": "5 signs that you will go pro in football",
+      "items": [
+        "Touches in every spare minute",
+        "A ball is never far from your feet",
+        "Practising touches while watching telly",
+        "Extra reps nobody asked you to do",
+        "Staying sharp without anyone telling you to"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "extra touches",
+      "approvedAt": "2026-09-08T14:46:33.279Z",
+      "renderedAt": "2026-09-08T14:47:01.423Z",
+      "outDir": "out\\2026-09-08-5-signs-that-you-will-go-4",
+      "caption_full": "extra touches #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dasdd.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-5-things-that-will-kill-your-4",
+      "status": "rendered",
+      "createdAt": "2026-09-08T14:46:08.520Z",
+      "hook": "5 things that will kill your football career",
+      "items": [
+        "Scrolling until 1am before a match",
+        "Losing an hour of sleep to your phone",
+        "Watching highlights instead of resting",
+        "Waking up tired because of last night",
+        "Trading recovery for another hour of scrolling"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "put it down",
+      "approvedAt": "2026-09-08T14:46:33.503Z",
+      "renderedAt": "2026-09-08T14:47:03.758Z",
+      "outDir": "out\\2026-09-08-5-things-that-will-kill-your-4",
+      "caption_full": "put it down #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dsad.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-small-habits-that-are-holding-you-3",
+      "status": "rendered",
+      "createdAt": "2026-09-08T14:46:08.520Z",
+      "hook": "Small habits that are holding you back from improving",
+      "items": [
+        "Skipping breakfast before a game",
+        "Eating whatever's easiest, not what helps",
+        "Too much food too close to kick off",
+        "Not drinking enough water all day",
+        "Running on nothing but nerves by kick off"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "fuel it right",
+      "approvedAt": "2026-09-08T14:46:33.732Z",
+      "renderedAt": "2026-09-08T14:47:05.768Z",
+      "outDir": "out\\2026-09-08-small-habits-that-are-holding-you-3",
+      "caption_full": "fuel it right #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dasdd.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-5-reasons-you-will-never-go-4",
+      "status": "rendered",
+      "createdAt": "2026-09-08T14:46:08.520Z",
+      "hook": "5 reasons you will never go pro in football",
+      "items": [
+        "Ignoring the pain and playing through it",
+        "Skipping physio because it's boring",
+        "Rushing the rehab to get back quicker",
+        "Hiding how bad it actually is",
+        "Coming back before your body's ready"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "heal properly",
+      "approvedAt": "2026-09-08T14:46:33.997Z",
+      "renderedAt": "2026-09-08T14:47:07.802Z",
+      "outDir": "out\\2026-09-08-5-reasons-you-will-never-go-4",
+      "caption_full": "heal properly #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dsad.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-5-things-that-will-kill-your-5",
+      "status": "rendered",
+      "createdAt": "2026-09-08T14:46:08.520Z",
+      "hook": "5 things that will kill your football career",
+      "items": [
+        "Skipping the final fitness tests",
+        "Rushing it to impress the coach",
+        "Playing at eighty percent and calling it fine",
+        "Not building your strength back up first",
+        "Risking the same injury all over again"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "don't rush it",
+      "approvedAt": "2026-09-08T14:46:34.244Z",
+      "renderedAt": "2026-09-08T14:47:09.791Z",
+      "outDir": "out\\2026-09-08-5-things-that-will-kill-your-5",
+      "caption_full": "don't rush it #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dasdd.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-small-habits-that-are-holding-you-4",
+      "status": "rendered",
+      "createdAt": "2026-09-08T14:46:08.520Z",
+      "hook": "Small habits that are holding you back from improving",
+      "items": [
+        "One mistake, full meltdown",
+        "Letting one error live in your head",
+        "Negative talk after every misplaced pass",
+        "Never saying a word of encouragement to yourself",
+        "Spiralling instead of resetting for the next play"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "reset your head",
+      "approvedAt": "2026-09-08T14:46:34.482Z",
+      "renderedAt": "2026-09-08T14:47:11.856Z",
+      "outDir": "out\\2026-09-08-small-habits-that-are-holding-you-4",
+      "caption_full": "reset your head #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dsad.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-5-reasons-you-will-never-go-5",
+      "status": "rendered",
+      "createdAt": "2026-09-08T14:46:08.520Z",
+      "hook": "5 reasons you will never go pro in football",
+      "items": [
+        "Sulking instead of training harder",
+        "Skipping the extra sessions",
+        "Blaming the coach for picking someone else",
+        "Giving up on the fight to get back in",
+        "Letting it convince you that you're not good enough"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "fight for it",
+      "approvedAt": "2026-09-08T14:46:34.730Z",
+      "renderedAt": "2026-09-08T14:47:13.842Z",
+      "outDir": "out\\2026-09-08-5-reasons-you-will-never-go-5",
+      "caption_full": "fight for it #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dasdd.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-5-things-that-will-kill-your-6",
+      "status": "rendered",
+      "createdAt": "2026-09-08T14:46:08.520Z",
+      "hook": "5 things that will kill your football career",
+      "items": [
+        "Treating them as a threat",
+        "Working less out of fear",
+        "Comparing yourself to them constantly",
+        "Getting quietly bitter instead of better",
+        "Letting someone else's arrival lower your standards"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "raise your game",
+      "approvedAt": "2026-09-08T14:46:34.963Z",
+      "renderedAt": "2026-09-08T14:47:15.847Z",
+      "outDir": "out\\2026-09-08-5-things-that-will-kill-your-6",
+      "caption_full": "raise your game #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dsad.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-small-habits-that-are-holding-you-5",
+      "status": "rendered",
+      "createdAt": "2026-09-08T14:46:08.520Z",
+      "hook": "Small habits that are holding you back from improving",
+      "items": [
+        "Half effort on easy reps",
+        "Switching off during the boring reps",
+        "Going through the motions instead of focusing",
+        "Skipping the parts that feel repetitive",
+        "Only trying hard when it's fun"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "boring reps count too",
+      "approvedAt": "2026-09-08T14:46:35.200Z",
+      "renderedAt": "2026-09-08T14:47:17.860Z",
+      "outDir": "out\\2026-09-08-small-habits-that-are-holding-you-5",
+      "caption_full": "boring reps count too #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dasdd.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-5-signs-that-you-will-go-5",
+      "status": "rendered",
+      "createdAt": "2026-09-08T14:46:08.520Z",
+      "hook": "5 signs that you will go pro in football",
+      "items": [
+        "Stretching even on days off",
+        "Rest doesn't mean doing nothing",
+        "Sleeping properly instead of staying up late",
+        "Light movement instead of total inactivity",
+        "Using the day to actually recover, not relax"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "rest properly",
+      "approvedAt": "2026-09-08T14:46:35.428Z",
+      "renderedAt": "2026-09-08T14:47:20.059Z",
+      "outDir": "out\\2026-09-08-5-signs-that-you-will-go-5",
+      "caption_full": "rest properly #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dsad.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-5-reasons-you-will-never-go-6",
+      "status": "rendered",
+      "createdAt": "2026-09-08T14:46:08.521Z",
+      "hook": "5 reasons you will never go pro in football",
+      "items": [
+        "Panic under real pressure",
+        "Rushing it instead of controlling it",
+        "Giving the ball away under no pressure",
+        "Never practising it against real pace",
+        "Freezing the moment a defender gets close"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "control it",
+      "approvedAt": "2026-09-08T14:46:35.652Z",
+      "renderedAt": "2026-09-08T14:47:22.113Z",
+      "outDir": "out\\2026-09-08-5-reasons-you-will-never-go-6",
+      "caption_full": "control it #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dasdd.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-5-things-that-will-kill-your-7",
+      "status": "rendered",
+      "createdAt": "2026-09-08T14:46:08.521Z",
+      "hook": "5 things that will kill your football career",
+      "items": [
+        "Avoiding it in every drill",
+        "Passing around it instead of through it",
+        "Never practising it outside training",
+        "Relying on your strong foot every time",
+        "Staying one footed while everyone else improves"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "use both feet",
+      "approvedAt": "2026-09-08T14:46:35.883Z",
+      "renderedAt": "2026-09-08T14:47:24.178Z",
+      "outDir": "out\\2026-09-08-5-things-that-will-kill-your-7",
+      "caption_full": "use both feet #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dsad.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-small-habits-that-are-holding-you-6",
+      "status": "rendered",
+      "createdAt": "2026-09-08T14:46:08.521Z",
+      "hook": "Small habits that are holding you back from improving",
+      "items": [
+        "Switching off with ten to go",
+        "Stopping tracking back once it's safe",
+        "Coasting instead of finishing it properly",
+        "Losing focus once the result's decided",
+        "Letting easy wins build habits that cost you later"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "see it out",
+      "approvedAt": "2026-09-08T14:46:36.103Z",
+      "renderedAt": "2026-09-08T14:47:26.169Z",
+      "outDir": "out\\2026-09-08-small-habits-that-are-holding-you-6",
+      "caption_full": "see it out #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dasdd.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-5-reasons-you-will-never-go-7",
+      "status": "rendered",
+      "createdAt": "2026-09-08T14:46:08.521Z",
+      "hook": "5 reasons you will never go pro in football",
+      "items": [
+        "Sulking instead of working harder",
+        "Going quiet on your teammates",
+        "Blaming everyone else for the scoreline",
+        "Giving up before the final whistle",
+        "Letting one bad half decide your whole game"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "keep fighting",
+      "approvedAt": "2026-09-08T14:46:36.330Z",
+      "renderedAt": "2026-09-08T14:47:28.184Z",
+      "outDir": "out\\2026-09-08-5-reasons-you-will-never-go-7",
+      "caption_full": "keep fighting #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dsad.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-5-silent-killers-of-your-football",
+      "status": "rendered",
+      "createdAt": "2026-09-08T15:19:16.599Z",
+      "hook": "5 silent killers of your football career",
+      "items": [
+        "You skip the cool down after a hard session",
+        "Hiding during matches when you play badly",
+        "You only put effort into attacking",
+        "Ignoring minor injuries",
+        "You care more about looking good than running hard"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "check yourself",
+      "approvedAt": "2026-09-08T15:19:19.772Z",
+      "renderedAt": "2026-09-08T15:19:26.343Z",
+      "outDir": "out\\2026-09-08-5-silent-killers-of-your-football",
+      "caption_full": "check yourself #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dsad.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-5-signs-you-have-a-future",
+      "status": "rendered",
+      "createdAt": "2026-09-08T15:19:16.599Z",
+      "hook": "5 signs you have a future in football",
+      "items": [
+        "Asking the coach where you need to improve",
+        "You do the running nobody else wants to do",
+        "Sleeping eight hours every single night",
+        "You train on your days off",
+        "You never let one bad pass ruin your whole match"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "stay on it",
+      "approvedAt": "2026-09-08T15:19:20.206Z",
+      "renderedAt": "2026-09-08T15:19:28.359Z",
+      "outDir": "out\\2026-09-08-5-signs-you-have-a-future",
+      "caption_full": "stay on it #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dasdd.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-small-habits-keeping-you-on-the",
+      "status": "rendered",
+      "createdAt": "2026-09-08T15:19:16.599Z",
+      "hook": "Small habits keeping you on the bench",
+      "items": [
+        "Turning up late to training",
+        "You only practice what you are already good at",
+        "Walking back when you lose the ball",
+        "You complain to the referee instead of tracking back",
+        "You expect the first team to just hand you a spot"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "fix it today",
+      "approvedAt": "2026-09-08T15:19:21.004Z",
+      "renderedAt": "2026-09-08T15:19:30.405Z",
+      "outDir": "out\\2026-09-08-small-habits-keeping-you-on-the",
+      "caption_full": "fix it today #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dsad.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-5-reasons-you-will-never-go-8",
+      "status": "rendered",
+      "createdAt": "2026-09-08T15:19:16.599Z",
+      "hook": "5 reasons you will never go pro in football",
+      "items": [
+        "You give up the second you go a goal down",
+        "Only trying hard when the manager is watching",
+        "Skipping your gym work",
+        "Eating a heavy meal right before a match",
+        "You accept being average because it is easy"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "truth hurts",
+      "approvedAt": "2026-09-08T15:19:21.512Z",
+      "renderedAt": "2026-09-08T15:19:32.435Z",
+      "outDir": "out\\2026-09-08-5-reasons-you-will-never-go-8",
+      "caption_full": "truth hurts #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dasdd.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-5-signs-that-you-will-go-6",
+      "status": "rendered",
+      "createdAt": "2026-09-08T15:19:16.600Z",
+      "hook": "5 signs that you will go pro in football",
+      "items": [
+        "You treat amateur matches like cup finals",
+        "Studying your position instead of just watching",
+        "You stretch every evening",
+        "Taking feedback without getting defensive",
+        "You are willing to drop friends who hold you back"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "keep going",
+      "approvedAt": "2026-09-08T15:19:21.998Z",
+      "renderedAt": "2026-09-08T15:19:34.483Z",
+      "outDir": "out\\2026-09-08-5-signs-that-you-will-go-6",
+      "caption_full": "keep going #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dsad.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-5-hidden-habits-ruining-your-football",
+      "status": "rendered",
+      "createdAt": "2026-09-08T15:19:16.600Z",
+      "hook": "5 hidden habits ruining your football career",
+      "items": [
+        "You let your parents fight your battles",
+        "Sulking when you are subbed off",
+        "Panicking under pressure",
+        "Always looking for an excuse when you play badly",
+        "You care more about social media than training"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "be honest",
+      "approvedAt": "2026-09-08T15:19:22.482Z",
+      "renderedAt": "2026-09-08T15:19:36.502Z",
+      "outDir": "out\\2026-09-08-5-hidden-habits-ruining-your-football",
+      "caption_full": "be honest #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dasdd.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-small-habits-that-are-holding-you-7",
+      "status": "rendered",
+      "createdAt": "2026-09-08T15:19:16.600Z",
+      "hook": "Small habits that are holding you back from improving",
+      "items": [
+        "You waste your rest days",
+        "Rushing your recovery when you have a knock",
+        "You only pass to your friends on the pitch",
+        "Copying pros instead of learning the basics",
+        "You refuse to use your weaker foot in a real match"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "sort it out",
+      "approvedAt": "2026-09-08T15:19:22.916Z",
+      "renderedAt": "2026-09-08T15:19:38.538Z",
+      "outDir": "out\\2026-09-08-small-habits-that-are-holding-you-7",
+      "caption_full": "sort it out #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dsad.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-5-things-that-will-kill-your-8",
+      "status": "rendered",
+      "createdAt": "2026-09-08T15:19:16.600Z",
+      "hook": "5 things that will kill your football career",
+      "items": [
+        "Going out on a Friday before a game",
+        "You think stretching is a waste of time",
+        "Ignoring the tactical side",
+        "You argue with every single referee decision",
+        "Deep down you do not actually want to work for it"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "time to wake up",
+      "approvedAt": "2026-09-08T15:19:23.378Z",
+      "renderedAt": "2026-09-08T15:19:40.775Z",
+      "outDir": "out\\2026-09-08-5-things-that-will-kill-your-8",
+      "caption_full": "time to wake up #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dasdd.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-5-reasons-you-are-stuck-in",
+      "status": "rendered",
+      "createdAt": "2026-09-08T15:19:16.600Z",
+      "hook": "5 reasons you are stuck in Sunday league",
+      "items": [
+        "You expect to start every match",
+        "Showing up to the pitch completely stiff",
+        "You never practice alone",
+        "Blaming the pitch when your first touch is awful",
+        "You are terrified of looking stupid on the ball"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "no more excuses",
+      "approvedAt": "2026-09-08T15:19:23.810Z",
+      "renderedAt": "2026-09-08T15:19:42.991Z",
+      "outDir": "out\\2026-09-08-5-reasons-you-are-stuck-in",
+      "caption_full": "no more excuses #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dsad.jpg"
+      ]
+    },
+    {
+      "id": "2026-09-08-5-signs-you-are-actually-going",
+      "status": "rendered",
+      "createdAt": "2026-09-08T15:19:16.600Z",
+      "hook": "5 signs you are actually going to make it",
+      "items": [
+        "You take your physical recovery seriously",
+        "Watching full matches to study movement",
+        "You accept tough criticism",
+        "Putting the team ahead of your own stats",
+        "You outwork the players with more natural talent"
+      ],
+      "cta": "Tip: start using the Drillr app to get daily stretches and drills made for your position",
+      "caption": "lock it in",
+      "approvedAt": "2026-09-08T15:19:24.302Z",
+      "renderedAt": "2026-09-08T15:19:45.278Z",
+      "outDir": "out\\2026-09-08-5-signs-you-are-actually-going",
+      "caption_full": "lock it in #football #footballapp #footballskills #soccer #footballtiktok",
+      "backgrounds": [
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "2713202.jpg",
+        "images.jpg",
+        "photo-1566895291281-ea63efd4bdbc.jpg",
+        "photo-1597573337211-e1080012b84b.jpg",
+        "13be95147b920e7c4ee958ff30db7a11.jpg",
+        "dasdd.jpg"
+      ]
+    }
+  ]
 }

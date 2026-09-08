@@ -67,6 +67,10 @@ const flag = (name, fallback = null) => {
 };
 const has = (name) => args.includes(`--${name}`);
 
+/** Windows separators -> POSIX. Anything written into state/queue.json goes
+ *  through this: that file is committed and read on a Linux runner. */
+const toPosix = (p) => String(p).split('\\').join('/');
+
 // A carousel count is only ever a small whole number. Anything else - a typo,
 // a stray flag that ate the value, 0, 2.5 - is rejected rather than silently
 // turned into NaN and sent to the model as "draft NaN carousel(s)".
@@ -577,7 +581,14 @@ function renderPost(queue, post) {
 
   post.status = 'rendered';
   post.renderedAt = new Date().toISOString();
-  post.outDir = path.relative(REPO, outDir);
+  // POSIX separators, always. This lands in state/queue.json, which is
+  // committed and read back by the scheduled job on a Linux runner - a Windows
+  // `out\<id>` there is one filename containing a backslash, not a path, and
+  // it fails with ENOENT on a directory that is sitting right there.
+  post.outDir = toPosix(path.relative(REPO, outDir));
+  // Recorded so a dry run can say how many slides it would post without
+  // needing the images, which CI never has: out/ is gitignored.
+  post.slideCount = slides.length;
   post.caption_full = caption;
   post.backgrounds = [...players.files, ...stadiums.files].map((f) => path.basename(f));
   queueLib.save(queue);
@@ -618,10 +629,21 @@ async function publish() {
   }
 
   const tk = CONFIG.tiktok;
-  const slides = fs
-    .readdirSync(path.join(REPO, post.outDir))
-    .filter((f) => /^\d+\.jpg$/.test(f))
-    .sort();
+
+  // toPosix covers posts rendered before outDir was normalised - there are
+  // rendered entries in the committed queue carrying Windows separators.
+  const outDir = path.join(REPO, toPosix(post.outDir));
+  const onDisk = fs.existsSync(outDir)
+    ? fs.readdirSync(outDir).filter((f) => /^\d+\.jpg$/.test(f)).sort()
+    : null;
+
+  // A dry run must not need the JPEGs. out/ is gitignored, so the scheduled
+  // job has the queue but never the images, and reading the directory before
+  // the dry-run check made the daily run fail on a post it was only ever going
+  // to describe. Fall back to the recorded slide count.
+  const count = post.slideCount ?? (post.items?.length ?? CONFIG.itemCount) + 2;
+  const slides =
+    onDisk ?? Array.from({ length: count }, (_, i) => `${String(i + 1).padStart(2, '0')}.jpg`);
   const urls = slides.map((f) => `${tk.urlPrefix}${post.id}/${f}`);
 
   if (!tk.enabled || !has('commit')) {
@@ -634,6 +656,17 @@ async function publish() {
         '\n  Both must be true to post. See README "Turning on auto-post".'
     );
     return;
+  }
+
+  // Past the dry-run gate the images have to be real - they are what gets
+  // hosted and pulled. Say so plainly rather than posting a list of URLs that
+  // nothing is serving.
+  if (!onDisk) {
+    throw new Error(
+      `${post.outDir} is not on this machine, so there is nothing to upload.\n` +
+        `  out/ is gitignored, so a checkout of this repo never has it - render on\n` +
+        `  the machine that will publish, or serve the slides from somewhere first.`
+    );
   }
 
   const { refreshAccessToken, creatorInfo, postCarousel, publishStatus } = await import('./lib/tiktok.mjs');

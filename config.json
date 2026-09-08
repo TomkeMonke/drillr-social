@@ -94,7 +94,60 @@
     ],
     "repeatHooks": true,
     "model": "claude-opus-5",
-    "effort": "high"
+    "effort": "high",
+
+    "_countComment": [
+      "defaultCount: how many carousels a bare `go` / `brief` / `plan` drafts.",
+      "",
+      "maxCount: a TYPO GUARD, not a technical limit - it exists so `--count 100`",
+      "when you meant 10 fails loudly instead of quietly starting a huge run.",
+      "Raise it freely. Nothing in the code breaks at 200; what actually binds,",
+      "in the order you hit it:",
+      "",
+      "  ~50   references/angles.json runs out of distinct subjects, so the",
+      "        carousels past that point get no angle and fall back to whatever",
+      "        the model picks. Fix by adding angles, not by lowering this.",
+      "  ~55   the API path's output ceiling. max_tokens now scales with count",
+      "        and `plan` streams, so the real cap is Opus 5's 128K output.",
+      "  any   the free path pastes into a chat window, and a chat model asked",
+      "        for 40 distinct carousels writes 40 mediocre ones. This is the",
+      "        one that actually bites, and no config value fixes it - large",
+      "        batches are worse copy, not just slower copy.",
+      "  any   `go` stops on every draft at the review gate. 50 drafts is 50",
+      "        decisions in one sitting.",
+      "",
+      "So the number below is a guard rail rather than a ceiling. If you want a",
+      "big batch, run several smaller ones - the angle rotation and the worn-word",
+      "list both update between runs, so three batches of 10 come back more",
+      "varied than one batch of 30."
+    ],
+    "defaultCount": 10,
+    "maxCount": 50,
+
+    "memory": {
+      "_comment": [
+        "How much of the back catalogue goes into the prompt. All of it is in",
+        "state/queue.json; almost none of it belongs in the brief, which has to",
+        "stay short enough to paste into a chat window. See lib/memory.mjs.",
+        "",
+        "angles: draw one subject per carousel from references/angles.json,",
+        "least-recently-offered first. This is the part that actually stops the",
+        "output converging - the prompt is otherwise a constant, so the modal",
+        "answer is a constant. Set false to go back to unsteered drafting.",
+        "A --topic on the command line turns it off for that run either way.",
+        "",
+        "wornWords: how many over-used words to name. They are named as fatigue,",
+        "not as a ban - a hard ban makes the model write AROUND the word and the",
+        "copy stops sounding human, which is the opposite of the point.",
+        "",
+        "hooks: how many distinct past hooks to list, with a use count each.",
+        "Distinct, not recent: the account reuses hooks on purpose, so the old",
+        "flat list of 40 was mostly the same six strings over and over."
+      ],
+      "angles": true,
+      "wornWords": 12,
+      "hooks": 20
+    }
   },
 
   "tiktok": {

@@ -153,7 +153,7 @@ It was `0.95` before the type cap existed, when the hook fitted to 138px and the
 ## The loop
 
 ```bash
-node slideshow.mjs plan --count 3    # Claude drafts 3 carousels
+node slideshow.mjs plan --count 10   # Claude drafts 10 carousels
 node slideshow.mjs list              # see the queue
 node slideshow.mjs approve all       # the gate
 node slideshow.mjs render            # -> out/<id>/01.jpg .. 07.jpg + caption.txt
@@ -184,19 +184,47 @@ There are two free paths, and neither of them needs the SDK installed.
 ### `go` - the whole loop, one command
 
 ```bash
-node slideshow.mjs go        # or: npm start
+node slideshow.mjs go             # or: npm start
+node slideshow.mjs go --count 25  # skip the "how many?" question
 ```
 
-It copies the brief to your clipboard, waits while you paste it into whatever
-assistant you already have open, reads the reply back off the clipboard, queues
-it, walks you through the copy one post at a time, and renders what you approve.
-Four verbs and a hand-made JSON file collapse into one command and a keystroke.
+It asks how many carousels you want (Enter for 10, or pass `--count` to answer
+it up front), copies the brief to your clipboard, waits while you paste it into
+whatever assistant you already have open, reads the reply back off the
+clipboard, queues it, walks you through the copy one post at a time, and renders
+what you approve. Four verbs and a hand-made JSON file collapse into one command
+and a keystroke.
 
 `go` does **not** weaken the review gate. It walks the same state machine as
 everything else and stops on every draft to print the copy and wait for `y`, so
 a set nobody has read still cannot render. Non-interactive shells are refused
 outright, which is what stops a cron job from ever inheriting a pipe and
 auto-approving itself.
+
+#### How many to ask for
+
+`config.copy.defaultCount` (10) is what a bare run drafts;
+`config.copy.maxCount` (50) is a **typo guard, not a technical limit** - it
+catches `--count 100` when you meant 10. Raise it and nothing breaks. What
+actually binds, in the order you hit it:
+
+- **~50** - `references/angles.json` runs out of distinct subjects. Past that,
+  the extra carousels get no angle and the brief says so. Fix by adding angles,
+  not by lowering the cap.
+- **~55** - the API path's output ceiling. `plan` now scales `max_tokens` with
+  the count and streams the response, so the real limit is Opus 5's 128K output
+  rather than the old hardcoded 16K. Below that it used to just stop early and
+  hand back fewer carousels than asked for, which read like the model being lazy;
+  it now says so explicitly and queues what arrived.
+- **no fixed number** - the free path pastes into a chat window, and a chat
+  model asked for 40 distinct carousels writes 40 mediocre ones. This is the one
+  that actually bites, and no config value fixes it.
+- **no fixed number** - `go` stops on every draft. 50 drafts is 50 decisions in
+  one sitting.
+
+So for a big batch, prefer several smaller runs. The angle rotation and the
+worn-word list both update between runs, which means three batches of 10 come
+back more varied than one batch of 30.
 
 ### `/carousel` - inside Claude Code, no paste at all
 
@@ -216,7 +244,7 @@ that it may never approve its own copy.
 ### The pieces, if you want them separately
 
 ```bash
-node slideshow.mjs brief --count 3   # brief -> clipboard (and stdout)
+node slideshow.mjs brief --count 10  # brief -> clipboard (and stdout)
 node slideshow.mjs brief --raw       # brief -> stdout only, for piping
 node slideshow.mjs import            # reply <- clipboard
 node slideshow.mjs import --from drafts.json
@@ -296,6 +324,89 @@ it, and `makeId` keeps the ids apart (a same-day repeat gets a `-2` suffix).
 Set it to `false` to restore the original behaviour exactly: the prompt forbids
 repeating an angle or writing a near-synonym, and `import` silently skips any
 draft whose hook is already in the queue. One value, nothing else to edit.
+
+### Why the drafts used to come back the same
+
+Three separate causes, and only one of them was the model.
+
+**The memory tracked the wrong field.** The brief fed back `post.hook` and
+nothing else. Items are five of the seven slides - the actual body of the post -
+and they were never fed back at all, so the model had no way of knowing it had
+written "Not getting enough sleep" eleven times.
+
+**It spent that budget on the one field allowed to repeat.** With
+`repeatHooks: true`, reusing a hook is fine by design. So up to forty lines of
+prompt went to context nobody was policing, and zero to the thing that goes
+stale. On a real queue those forty lines were about six distinct strings.
+
+**The prompt was a constant, so the output was a constant.** Same system text,
+same three examples, same ask. And that prompt named the same seven topics -
+sleep, food, motivation, recovery, work ethic, fear, comparison - four times
+over: in the account description, in the five illustrative items, in the corpus
+itself, and once more in a "do NOT reuse their topics: sleep, junk food..."
+line that primed them while forbidding them. About twenty exemplars, all inside
+one small region. No temperature fixes that; the attractor is in the prompt.
+
+### How the memory works now
+
+The rule is **the tool remembers everything, the prompt carries only what
+changed**. Two channels, and the split is what keeps the brief pasteable:
+
+| | cost | carries |
+|---|---|---|
+| prompt (`lib/memory.mjs`) | must stay short | a signal: worn words, counted hooks, fresh angles |
+| validator (`import`) | free, unbounded | every item ever written, compared line by line |
+
+Four mechanisms, in order of how much they actually do:
+
+**Angles** (`references/angles.json`) - a pool of ~50 subjects, one drawn per
+carousel, least-recently-offered first, tracked in `state/angles-used.json`.
+Only the drawn ones enter the prompt, so the pool can grow to any size without
+the brief growing by a line. This is the part that does the work: a model does
+not become varied when you ask it to, it becomes varied when you give it
+somewhere else to go. **Adding lines to that file is the cheapest possible way
+to make the feed less repetitive**, and it needs no code change.
+
+**Worn words** - the dozen most-used content words across every past item and
+caption, stemmed and grouped, on one line. Constant size no matter how deep the
+history gets. Computed from items and captions only, never hooks, because hook
+vocabulary *is* the formula ("career", "pro", "signs") and flagging it would be
+telling the model to stop writing the hook shape that works.
+
+**Counted hooks** - distinct past hooks with a use count each, rather than a
+flat list with the same string repeated ten times. Lossless for the purpose,
+shrinks as the account repeats itself, and adds the thing the flat list threw
+away: *which* hooks are tired.
+
+**A duplicate check at the gate** - `import` compares every incoming item
+against every item ever posted and prints `= item 3 is close to one already
+posted: "..."`. This costs the prompt nothing, which is exactly why the deep
+history lives here rather than in the brief.
+
+Net effect on length: at 40 posts of history the brief went from **210 lines to
+193**. It got shorter while carrying strictly more.
+
+### None of it is a ban
+
+Deliberately. A hard prohibition does not make a model write something better,
+it makes it write *around* the word - forbid "sleep" and you get "the hours you
+spend horizontal", which is worse copy and still about sleep.
+
+So the pressure is asymmetric: **angles are stated firmly, everything else is
+stated softly.** The angle block ends with "a starting point, not a cage - if an
+angle will not give you a full set that sounds like this account, drop it and
+write the better set". The worn list says "NOT banned, where one is genuinely
+the right word, use it". The duplicate check warns and queues the post anyway,
+the same way `lint` does, because a repeat is sometimes the point and only the
+person at the review gate can tell that from laziness.
+
+That looseness is also what makes the rough edges harmless. The stemmer is
+crude and the stopword list is hand-written; when either misfires the result is
+one slightly-odd word in a list the model is told it may ignore.
+
+The knobs are in `config.copy.memory` - `angles` (false turns the steering off),
+`wornWords`, `hooks`. A `--topic` on the command line suppresses the angles for
+that run, since the topic is already the steering.
 
 ### Length is free until it isn't
 
@@ -390,7 +501,9 @@ leaving a dead token in place.
     render.py         Pillow renderer; the whole look lives here
     config.json       template tuning, CTA text, hashtags, TikTok settings
     references/examples.json  20 slides of real posts - the few-shot corpus
+    references/angles.json    the angle pool - what each carousel is ABOUT
     lib/houserules.mjs    the system prompt, the clean-up and the lint
+    lib/memory.mjs    the back catalogue, compressed small enough to fit a prompt
     lib/copy.mjs      Claude drafting over the API (the only paid path)
     lib/clipboard.mjs cross-platform clipboard I/O for the free path
     lib/queue.mjs     the draft->approved->rendered->posted state machine
@@ -398,6 +511,7 @@ leaving a dead token in place.
     lib/tiktok.mjs    Content Posting API
     .claude/commands/carousel.md   the /carousel slash command
     backgrounds/      wallpapers you supply (gitignored)
-    state/            queue.json + backgrounds-used.json (committed - this is the memory)
+    state/            queue.json, backgrounds-used.json, angles-used.json
+                      (committed - this is the memory)
     out/              rendered slides (gitignored)
 

@@ -1,11 +1,12 @@
 // Drillr TikTok carousel pipeline.
 //
 //   node slideshow.mjs go                  # the whole free loop, one command
+//   node slideshow.mjs go --count 5        # ... skipping the "how many?" prompt
 //
 //   node slideshow.mjs doctor              # is everything wired up
 //   node slideshow.mjs fonts               # fetch candidate fonts (one-off)
-//   node slideshow.mjs plan --count 3      # Claude drafts 3 carousels (API key)
-//   node slideshow.mjs brief --count 3     # copy that same ask to the clipboard (free)
+//   node slideshow.mjs plan --count 10     # Claude drafts 10 carousels (API key)
+//   node slideshow.mjs brief --count 10    # copy that same ask to the clipboard (free)
 //   node slideshow.mjs brief --raw         # print it bare, for a script to pipe
 //   node slideshow.mjs import              # queue the reply from the clipboard (free)
 //   node slideshow.mjs import --from x.json  # ... or from a file, or stdin
@@ -48,6 +49,7 @@ import { fileURLToPath } from 'node:url';
 import * as queueLib from './lib/queue.mjs';
 import * as pool from './lib/backgrounds.mjs';
 import * as clipboard from './lib/clipboard.mjs';
+import * as memory from './lib/memory.mjs';
 // Safe to import at the top level: houserules.mjs has no dependencies, unlike
 // copy.mjs, which is loaded lazily inside `plan` so the SDK stays optional.
 import { systemFor, buildAsk, normalise, lint } from './lib/houserules.mjs';
@@ -65,6 +67,28 @@ const flag = (name, fallback = null) => {
 };
 const has = (name) => args.includes(`--${name}`);
 
+// A carousel count is only ever a small whole number. Anything else - a typo,
+// a stray flag that ate the value, 0, 2.5 - is rejected rather than silently
+// turned into NaN and sent to the model as "draft NaN carousel(s)".
+// Both live in config.copy so neither is a number buried in code. The ceiling
+// is a typo guard, not a technical limit - see the comment on copy.maxCount in
+// config.json for what actually binds as the count climbs, and raise it there
+// if you want 200.
+const DEFAULT_COUNT = CONFIG.copy?.defaultCount ?? 10;
+const MAX_COUNT = CONFIG.copy?.maxCount ?? 50;
+
+function parseCount(value, fallback = DEFAULT_COUNT) {
+  if (value === null || value === undefined || value === '') return fallback;
+  const n = Number(value);
+  if (!Number.isInteger(n) || n < 1 || n > MAX_COUNT) {
+    throw new Error(
+      `--count must be a whole number from 1 to ${MAX_COUNT} (got "${value}")\n` +
+        `  Raise config.copy.maxCount if you want more in one batch.`
+    );
+  }
+  return n;
+}
+
 // Flags that consume the next argument, so `--topic recovery` does not leave
 // "recovery" looking like a post id.
 const VALUED = new Set(['count', 'topic', 'from']);
@@ -74,6 +98,22 @@ const VALUED = new Set(['count', 'topic', 'from']);
 // config that predates the setting should get the behaviour that matches what
 // actually ran, not the stricter one.
 const repeatHooksEnabled = () => CONFIG.copy?.repeatHooks !== false;
+
+/**
+ * What the account has already said, compressed for the prompt.
+ *
+ * Both drafting paths go through here for the same reason they share buildAsk:
+ * they used to compute their own history slice, and the moment those drift,
+ * copy drafted through the API stops matching copy carried by hand.
+ *
+ * Drawing the angles marks them offered, so two briefs in a row get different
+ * ones. See lib/memory.mjs for why that is a rotation and not a budget.
+ */
+function recallMemory({ count, topic }) {
+  const past = memory.recall({ count, topic, settings: CONFIG.copy?.memory ?? {} });
+  memory.markAnglesOffered(past.angles);
+  return past;
+}
 const positional = [];
 for (let i = 1; i < args.length; i += 1) {
   if (args[i].startsWith('--')) {
@@ -126,23 +166,28 @@ async function fonts() {
 // ---------------------------------------------------------------- plan
 
 async function plan() {
-  const count = Number(flag('count', '3'));
+  const count = parseCount(flag('count'));
   const topic = flag('topic');
-  const queue = queueLib.load();
 
-  // Feed back everything we have ever written, not just what is pending -
-  // a hook that went out in June is exactly the one the model wants to write
-  // again in August.
-  const recentHooks = queue.posts.slice(-40).map((p) => p.hook);
+  // Everything the model needs to know about the past, compressed. This used
+  // to be `queue.posts.slice(-40).map(p => p.hook)` - forty lines of prompt
+  // spent on the one field config.copy.repeatHooks says may repeat, and not a
+  // word about the items, which are five of the seven slides and the thing
+  // that actually went stale.
+  const past = recallMemory({ count, topic });
 
   const { draftPosts } = await import('./lib/copy.mjs');
   console.log(`Drafting ${count} carousel(s) with ${CONFIG.copy.model}...`);
+  for (const angle of past.angles) console.log(`  angle: ${angle}`);
   const drafts = await draftPosts({
     count,
     itemCount: CONFIG.itemCount,
     topic,
-    recentHooks,
+    recentHooks: past.hooks,
     repeatHooks: repeatHooksEnabled(),
+    angles: past.angles,
+    worn: past.worn,
+    captions: past.captions,
     model: CONFIG.copy.model,
     effort: CONFIG.copy.effort,
   });
@@ -212,12 +257,21 @@ function approve() {
  * like two different accounts.
  */
 function buildBrief({ count, topic }) {
-  const queue = queueLib.load();
-  const recentHooks = queue.posts.slice(-40).map((p) => p.hook);
+  const past = recallMemory({ count, topic });
 
   const parts = [systemFor(CONFIG.itemCount), '\n---\n'];
 
-  parts.push(buildAsk({ count, topic, recentHooks, repeatHooks: repeatHooksEnabled() }));
+  parts.push(
+    buildAsk({
+      count,
+      topic,
+      recentHooks: past.hooks,
+      repeatHooks: repeatHooksEnabled(),
+      angles: past.angles,
+      worn: past.worn,
+      captions: past.captions,
+    })
+  );
 
   parts.push(
     `\nReply with nothing but a JSON array of ${count} object(s), each exactly:\n` +
@@ -242,7 +296,7 @@ function buildBrief({ count, topic }) {
  * step in the whole loop, and it is the step someone new hits first.
  */
 function brief() {
-  const count = Number(flag('count', '3'));
+  const count = parseCount(flag('count'));
   const topic = flag('topic');
   const text = buildBrief({ count, topic });
 
@@ -409,6 +463,31 @@ function queueDrafts(parsed) {
   return queued;
 }
 
+/**
+ * Items this post has effectively written before.
+ *
+ * The free half of the memory. `lint` can only see the post in front of it,
+ * and the prompt can only be told a dozen worn words before it stops being
+ * pasteable - but this runs locally against every item the account has ever
+ * written, at no cost to either. It is where the deep history actually lives.
+ *
+ * Warnings, never rejections, exactly like `lint`: a repeat is sometimes the
+ * point, and only the person at the gate can tell that from laziness.
+ */
+function repeatWarnings(post) {
+  const queue = queueLib.load();
+  const history = memory.allItems(queue.posts.filter((p) => p.id !== post.id));
+  const warnings = [];
+
+  for (const [i, item] of post.items.entries()) {
+    const match = memory.similar(item, history);
+    if (match) {
+      warnings.push(`item ${i + 1} is close to one already posted: "${match.item}"`);
+    }
+  }
+  return warnings;
+}
+
 /** Print one post the way the review gate wants to read it. */
 function showPost(post, indent = '  ') {
   console.log(`${indent}${post.id}`);
@@ -416,6 +495,7 @@ function showPost(post, indent = '  ') {
   post.items.forEach((item, i) => console.log(`${indent}  ${i + 1}. ${item}`));
   console.log(`${indent}  caption: ${post.caption}`);
   for (const warning of lint(post, CONFIG.itemCount)) console.log(`${indent}  ! ${warning}`);
+  for (const warning of repeatWarnings(post)) console.log(`${indent}  = ${warning}`);
 }
 
 function importDrafts() {
@@ -682,7 +762,22 @@ async function go() {
       console.log(`${drafts.length} draft(s) already waiting - reviewing those.`);
       console.log('(to draft more first, empty the queue or use `brief` + `import`)\n');
     } else {
-      const count = Number(flag('count', '3'));
+      // `--count 5` skips the question; without it `go` asks, because typing a
+      // number is the one thing the interactive path should not make you
+      // remember a flag for. A bad answer re-asks instead of throwing - you are
+      // sitting at the prompt, so there is nothing to abort back to.
+      let count = parseCount(flag('count'));
+      if (flag('count') === null) {
+        for (;;) {
+          const answer = await ask(`how many carousels? [${DEFAULT_COUNT}] (1-${MAX_COUNT}): `);
+          try {
+            count = parseCount(answer);
+            break;
+          } catch {
+            console.log(`  a whole number from 1 to ${MAX_COUNT}, or Enter for ${DEFAULT_COUNT}`);
+          }
+        }
+      }
       const topic = flag('topic');
       const text = buildBrief({ count, topic });
 
@@ -788,6 +883,16 @@ function doctor() {
 
   for (const overlay of CONFIG.cta.overlays ?? []) {
     ok(`CTA overlay ${overlay.path}`, fs.existsSync(path.resolve(REPO, overlay.path)));
+  }
+
+  // Not a failure either: an empty pool costs the brief its steering, not its
+  // ability to run. But a pool that has gone all the way round is worth seeing
+  // before the copy starts repeating, which is the whole reason it exists.
+  const angles = memory.angleStats();
+  if (!angles.total) {
+    console.log('  --   no angle pool - add lines to references/angles.json to steer the copy');
+  } else {
+    console.log(`  ok   angles: ${angles.total} in the pool, ${angles.fresh} never offered`);
   }
 
   console.log(`\n  auto-post: ${CONFIG.tiktok.enabled ? 'ENABLED' : 'off (config.tiktok.enabled=false)'}`);

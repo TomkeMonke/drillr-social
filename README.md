@@ -208,23 +208,18 @@ auto-approving itself.
 catches `--count 100` when you meant 10. Raise it and nothing breaks. What
 actually binds, in the order you hit it:
 
-- **~50** - `references/angles.json` runs out of distinct subjects. Past that,
-  the extra carousels get no angle and the brief says so. Fix by adding angles,
-  not by lowering the cap.
-- **~55** - the API path's output ceiling. `plan` now scales `max_tokens` with
-  the count and streams the response, so the real limit is Opus 5's 128K output
-  rather than the old hardcoded 16K. Below that it used to just stop early and
-  hand back fewer carousels than asked for, which read like the model being lazy;
-  it now says so explicitly and queues what arrived.
+- **~55** - the API path's output ceiling. `plan` scales `max_tokens` with the
+  count and streams the response, so the real limit is Opus 5's 128K output
+  rather than the old hardcoded 16K. Under the old fixed value a big batch just
+  stopped early and handed back fewer carousels than asked for, which read like
+  the model being lazy; it now says so explicitly and queues what arrived.
 - **no fixed number** - the free path pastes into a chat window, and a chat
   model asked for 40 distinct carousels writes 40 mediocre ones. This is the one
   that actually bites, and no config value fixes it.
 - **no fixed number** - `go` stops on every draft. 50 drafts is 50 decisions in
   one sitting.
 
-So for a big batch, prefer several smaller runs. The angle rotation and the
-worn-word list both update between runs, which means three batches of 10 come
-back more varied than one batch of 30.
+So for a big batch, prefer several smaller runs.
 
 ### `/carousel` - inside Claude Code, no paste at all
 
@@ -325,88 +320,64 @@ Set it to `false` to restore the original behaviour exactly: the prompt forbids
 repeating an angle or writing a near-synonym, and `import` silently skips any
 draft whose hook is already in the queue. One value, nothing else to edit.
 
-### Why the drafts used to come back the same
+### The repetition problem, and why the fix is switched off
 
-Three separate causes, and only one of them was the model.
+The drafts converge. Every batch comes back as another five lines about sleep,
+junk food, motivation and comparing yourself, because three things push it that
+way and only one of them is the model:
 
-**The memory tracked the wrong field.** The brief fed back `post.hook` and
-nothing else. Items are five of the seven slides - the actual body of the post -
-and they were never fed back at all, so the model had no way of knowing it had
-written "Not getting enough sleep" eleven times.
+**The memory tracks one field.** The brief feeds back `post.hook` and nothing
+else. Items are five of the seven slides - the body of the post - and are never
+fed back, so the model cannot know it has written "Not getting enough sleep"
+eleven times.
 
-**It spent that budget on the one field allowed to repeat.** With
+**That budget goes to the field that is allowed to repeat.** With
 `repeatHooks: true`, reusing a hook is fine by design. So up to forty lines of
-prompt went to context nobody was policing, and zero to the thing that goes
-stale. On a real queue those forty lines were about six distinct strings.
+prompt carry context nobody polices, and on a real queue those forty lines are
+about six distinct strings.
 
-**The prompt was a constant, so the output was a constant.** Same system text,
-same three examples, same ask. And that prompt named the same seven topics -
-sleep, food, motivation, recovery, work ethic, fear, comparison - four times
-over: in the account description, in the five illustrative items, in the corpus
-itself, and once more in a "do NOT reuse their topics: sleep, junk food..."
-line that primed them while forbidding them. About twenty exemplars, all inside
-one small region. No temperature fixes that; the attractor is in the prompt.
+**The prompt is a constant, so the output is a constant.** Same system text,
+same three examples, same ask - and that prompt names the same seven topics
+four times over, including a "do NOT reuse their topics: sleep, junk food..."
+line that primes them while forbidding them.
 
-### How the memory works now
+#### The fix that was built, and what it cost
 
-The rule is **the tool remembers everything, the prompt carries only what
-changed**. Two channels, and the split is what keeps the brief pasteable:
+`lib/memory.mjs` and `references/angles.json` attack all three: a drawn angle
+per carousel, a computed worn-word list, hooks with use counts, plus an
+import-time duplicate check. It is wired up, it works, and it is **off** -
+`config.copy.memory.enabled` is `false`.
 
-| | cost | carries |
-|---|---|---|
-| prompt (`lib/memory.mjs`) | must stay short | a signal: worn words, counted hooks, fresh angles |
-| validator (`import`) | free, unbounded | every item ever written, compared line by line |
+It was tried on 25 real carousels on 2026-09-08 and turned off again, because
+it bought variety *between* carousels by spending the variety *inside* them:
 
-Four mechanisms, in order of how much they actually do:
+    1. Avoiding it in every drill
+    2. Passing around it instead of through it
+    3. Never practising it outside training
+    4. Relying on your strong foot every time
 
-**Angles** (`references/angles.json`) - a pool of ~50 subjects, one drawn per
-carousel, least-recently-offered first, tracked in `state/angles-used.json`.
-Only the drawn ones enter the prompt, so the pool can grow to any size without
-the brief growing by a line. This is the part that does the work: a model does
-not become varied when you ask it to, it becomes varied when you give it
-somewhere else to go. **Adding lines to that file is the cheapest possible way
-to make the feed less repetitive**, and it needs no code change.
+The angle was "how much you use your weak foot". It lived in the prompt and
+never reached a slide, so nothing on slides 1-3 says what "it" is. Slide 1 is
+the one that has to stop a thumb, and it meant nothing. Same failure in
+"Treating them as a threat", where "them" is a new player in your position.
 
-**Worn words** - the dozen most-used content words across every past item and
-caption, stemmed and grouped, on one line. Constant size no matter how deep the
-history gets. Computed from items and captions only, never hooks, because hook
-vocabulary *is* the formula ("career", "pro", "signs") and flagging it would be
-telling the model to stop writing the hook shape that works.
+And pinning one angle per carousel made all five items paraphrase it - five
+ways of saying "you switch off on the bench" - where the real posts put sleep,
+junk food, motivation, stretching and comparison in a single carousel. Five
+different habits, not one habit five times.
 
-**Counted hooks** - distinct past hooks with a use count each, rather than a
-flat list with the same string repeated ten times. Lossless for the purpose,
-shrinks as the account repeats itself, and adds the thing the flat list threw
-away: *which* hooks are tired.
+Turn it back on only with a fix for both: an angle that names its own subject
+on every slide, or one angle per *batch* rather than per carousel.
 
-**A duplicate check at the gate** - `import` compares every incoming item
-against every item ever posted and prints `= item 3 is close to one already
-posted: "..."`. This costs the prompt nothing, which is exactly why the deep
-history lives here rather than in the brief.
+#### What stayed on
 
-Net effect on length: at 40 posts of history the brief went from **210 lines to
-193**. It got shorter while carrying strictly more.
+The parts that never touched the prompt, and cost nothing:
 
-### None of it is a ban
-
-Deliberately. A hard prohibition does not make a model write something better,
-it makes it write *around* the word - forbid "sleep" and you get "the hours you
-spend horizontal", which is worse copy and still about sleep.
-
-So the pressure is asymmetric: **angles are stated firmly, everything else is
-stated softly.** The angle block ends with "a starting point, not a cage - if an
-angle will not give you a full set that sounds like this account, drop it and
-write the better set". The worn list says "NOT banned, where one is genuinely
-the right word, use it". The duplicate check warns and queues the post anyway,
-the same way `lint` does, because a repeat is sometimes the point and only the
-person at the review gate can tell that from laziness.
-
-That looseness is also what makes the rough edges harmless. The stemmer is
-crude and the stopword list is hand-written; when either misfires the result is
-one slightly-odd word in a list the model is told it may ignore.
-
-The knobs are in `config.copy.memory` - `angles` (false turns the steering off),
-`wornWords`, `hooks`. A `--topic` on the command line suppresses the angles for
-that run, since the topic is already the steering.
+- **the duplicate check at the gate** - `import` compares every incoming item
+  against every item ever posted and prints `= item 3 is close to one already
+  posted: "..."`. Warning, never rejection, the same way `lint` works.
+- **`plan` streams and scales `max_tokens`** with the count. It was pinned at
+  16000, which on a big batch silently returned fewer carousels than asked for.
 
 ### Length is free until it isn't
 

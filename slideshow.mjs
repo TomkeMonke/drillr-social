@@ -169,11 +169,9 @@ async function plan() {
   const count = parseCount(flag('count'));
   const topic = flag('topic');
 
-  // Everything the model needs to know about the past, compressed. This used
-  // to be `queue.posts.slice(-40).map(p => p.hook)` - forty lines of prompt
-  // spent on the one field config.copy.repeatHooks says may repeat, and not a
-  // word about the items, which are five of the seven slides and the thing
-  // that actually went stale.
+  // What the model is told about the past. By default that is the flat list of
+  // previous hooks and nothing else - config.copy.memory.enabled swaps in the
+  // compressed version, and is off for the reason recorded above buildAsk.
   const past = recallMemory({ count, topic });
 
   const { draftPosts } = await import('./lib/copy.mjs');
@@ -185,6 +183,7 @@ async function plan() {
     topic,
     recentHooks: past.hooks,
     repeatHooks: repeatHooksEnabled(),
+    memory: past.enabled,
     angles: past.angles,
     worn: past.worn,
     captions: past.captions,
@@ -259,7 +258,7 @@ function approve() {
 function buildBrief({ count, topic }) {
   const past = recallMemory({ count, topic });
 
-  const parts = [systemFor(CONFIG.itemCount), '\n---\n'];
+  const parts = [systemFor(CONFIG.itemCount, { memory: past.enabled }), '\n---\n'];
 
   parts.push(
     buildAsk({
@@ -267,6 +266,7 @@ function buildBrief({ count, topic }) {
       topic,
       recentHooks: past.hooks,
       repeatHooks: repeatHooksEnabled(),
+      memory: past.enabled,
       angles: past.angles,
       worn: past.worn,
       captions: past.captions,

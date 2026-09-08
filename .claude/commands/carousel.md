@@ -16,21 +16,19 @@ nothing extra and there is no clipboard round trip.
 
 1. Run `node slideshow.mjs brief --raw --count <N>` (append `--topic <theme>` if
    one was given). That prints the complete brief: the house rules, the real
-   corpus of past posts as few-shot examples, a compressed read of what the
-   account has already said, and the exact JSON shape.
+   corpus of past posts as few-shot examples, the do-not-repeat list of every
+   hook already used, and the exact JSON shape.
 
 2. **Follow that brief as if it had been sent to you as a system prompt** - it
    is the same text `plan` sends the API. Do not improvise a different format
    and do not soften the house rules. Pay particular attention to:
    - the two hook formulas (the threat / the proof) - nothing else
    - picking ONE item shape and holding it for the whole carousel
-   - the WHAT EACH ONE IS ABOUT block: one drawn angle per carousel, and it is
-     the main thing stopping every batch coming back as the same five habits.
-     It ends with an escape hatch and means it - if an angle will not give you
-     a set that sounds like the account, drop it and write the better set
-   - the WORN OUT words and the hook counts, which are nudges rather than bans;
-     they are the reason this brief is generated fresh each time rather than
-     read from a static prompt
+   - the do-not-repeat list, which is the whole reason this is generated fresh
+     each time rather than from a static prompt
+   - FIVE DIFFERENT habits in one carousel, not five ways of saying one thing.
+     A set whose items only restate each other is the failure mode here, and it
+     is what an over-narrow subject produces
 
 3. Write the JSON array to `drafts.json` in the repo root. Nothing else may go
    in that file - array in, array out.
